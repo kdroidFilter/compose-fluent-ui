@@ -20,8 +20,46 @@ on:
   pull_request_review:
     types: submitted
 
+  schedule:
+    - cron: '0 3 * * 1'
+
 jobs:
+  check_inactivity:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      should_run: ${{ steps.inactivity.outputs.should_run }}
+    steps:
+      - id: inactivity
+        uses: actions/github-script@v7
+        with:
+          script: |
+            if (context.eventName !== 'schedule') {
+              core.setOutput('should_run', 'true');
+              return;
+            }
+
+            // Query the last commit date on the dev branch via the GitHub API.
+            const { data: branch } = await github.rest.repos.getBranch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              branch: 'dev',
+            });
+            const lastCommitAt = branch?.commit?.commit?.author?.date;
+            const lastCommitMs = Date.parse(lastCommitAt ?? '');
+            const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+            if (!Number.isFinite(lastCommitMs)) {
+              core.warning('Unable to parse last commit date on dev branch, proceeding with workflow execution.');
+              core.setOutput('should_run', 'true');
+              return;
+            }
+            const shouldRun = (Date.now() - lastCommitMs) >= sevenDaysMs;
+
+            core.setOutput('should_run', shouldRun ? 'true' : 'false');
+
   build:
+    needs: check_inactivity
     strategy:
       matrix:
         type: [PublishLibrary, Android, Windows, Linux, macOS, iOS, WasmJs, Js]
@@ -53,7 +91,7 @@ jobs:
             os: ubuntu-latest
 
     runs-on: ${{ matrix.os }}
-    if: ${{ github.event_name != 'pull_request_review' || github.event.review.state == 'approved' }}
+    if: ${{ (github.event_name != 'pull_request_review' || github.event.review.state == 'approved') && needs.check_inactivity.outputs.should_run == 'true' }}
     permissions:
       contents: read
       packages: write
