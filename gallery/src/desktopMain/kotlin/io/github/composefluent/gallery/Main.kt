@@ -10,6 +10,7 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
 import dev.nucleusframework.application.NucleusApplicationScope
 import dev.nucleusframework.application.nucleusApplication
+import dev.nucleusframework.darkmodedetector.getPlatformDarkModeDetector
 import dev.nucleusframework.graalvm.GraalVmInitializer
 import dev.nucleusframework.window.fluent.FluentDecoratedWindow
 import fluentdesign.gallery.generated.resources.Res
@@ -43,11 +44,15 @@ fun main() {
         val title = "Compose Fluent Design Gallery"
         val icon = painterResource(Res.drawable.icon)
         // The gallery Store lives at application level so the Fluent window
-        // chrome and every window share the same state. The resolved dark/light
-        // value is written by GalleryTheme inside the window (where the system
-        // theme signal is reliable) and read back here reactively.
+        // chrome and every window share the same state. Seed from the Nucleus
+        // OS detector so ThemeMode.System is correct on the first frame (Tao
+        // has no AWT LocalSystemTheme); GalleryTheme keeps it live afterwards.
         val store = remember {
-            Store(systemDarkMode = false, enabledAcrylicPopup = true, compactMode = true)
+            Store(
+                systemDarkMode = getPlatformDarkModeDetector().isDark(),
+                enabledAcrylicPopup = true,
+                compactMode = true,
+            )
         }
         // FluentDecoratedWindow reads the ambient FluentTheme colors for its
         // native chrome styling, so the colors must wrap the call. The full

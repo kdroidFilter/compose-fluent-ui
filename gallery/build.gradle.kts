@@ -60,6 +60,8 @@ kotlin {
             implementation(libs.nucleus.application)
             implementation(libs.nucleus.window.tao)
             implementation(libs.nucleus.graalvm.runtime)
+            // Live OS dark mode for ThemeMode.System (Tao has no AWT LocalSystemTheme).
+            implementation(libs.nucleus.darkmode.detector)
             implementation(project(":decorated-window-fluent"))
         }
     }

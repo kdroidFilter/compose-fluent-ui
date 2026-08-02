@@ -1,7 +1,6 @@
 package io.github.composefluent.gallery
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -64,7 +63,10 @@ fun GalleryTheme(
     store: Store? = null,
     content: @Composable () -> Unit
 ) {
-    val systemDarkMode = isSystemInDarkTheme()
+    // Desktop (Tao): Nucleus darkmode-detector — Compose's isSystemInDarkTheme
+    // reads Skiko/LocalSystemTheme which is unreliable without an AWT frame.
+    // Other targets: Compose foundation isSystemInDarkTheme.
+    val systemDarkMode = platformSystemInDarkMode()
 
     @Suppress("NAME_SHADOWING")
     val store = store ?: remember {
