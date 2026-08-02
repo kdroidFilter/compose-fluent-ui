@@ -1,5 +1,6 @@
 import com.android.build.api.variant.impl.VariantOutputImpl
 import com.codingfeline.buildkonfig.compiler.FieldSpec
+import dev.nucleusframework.desktop.application.dsl.CompressionLevel
 import dev.nucleusframework.desktop.application.dsl.TargetFormat
 import io.github.composefluent.plugin.build.BuildConfig
 import io.github.composefluent.plugin.build.applyTargets
@@ -140,7 +141,8 @@ nucleus.application {
     nativeDistributions {
         packageName = "compose-fluent-gallery"
         packageVersion = "1.0.0"
-        targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+        targetFormats(TargetFormat.Dmg, TargetFormat.Nsis, TargetFormat.Deb)
+        compressionLevel = CompressionLevel.Ultra
     }
     graalvm {
         isEnabled = true
