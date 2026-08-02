@@ -8,23 +8,21 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.rememberWindowState
+import dev.nucleusframework.window.fluent.FluentDecoratedWindow
+import fluentdesign.gallery.generated.resources.Res
+import fluentdesign.gallery.generated.resources.icon
 import io.github.composefluent.ExperimentalFluentApi
-import io.github.composefluent.FluentTheme
-import io.github.composefluent.FluentThemeConfiguration
 import io.github.composefluent.component.Button
 import io.github.composefluent.component.Text
+import io.github.composefluent.gallery.LocalNucleusApplicationScope
 import io.github.composefluent.gallery.LocalStore
 import io.github.composefluent.gallery.component.GalleryPageScope
 import io.github.composefluent.gallery.window.WindowFrame
-import fluentdesign.gallery.generated.resources.Res
-import fluentdesign.gallery.generated.resources.icon
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.skiko.hostOs
 
@@ -45,8 +43,13 @@ internal actual fun GalleryPageScope.PlatformTabViewSection() {
                 }
             )
             val windowState = rememberWindowState(width = 1600.dp, height = 1000.dp)
+            // Share the main window's store: the secondary window then follows
+            // theme, acrylic and backdrop settings automatically.
             val store = LocalStore.current
-            Window(
+            // Nucleus windows are declared on the application scope, which the
+            // main window publishes via LocalNucleusApplicationScope.
+            val applicationScope = LocalNucleusApplicationScope.current ?: return@Section
+            applicationScope.FluentDecoratedWindow(
                 visible = windowVisible.value,
                 onCloseRequest = {
                     windowVisible.value = false
@@ -55,21 +58,14 @@ internal actual fun GalleryPageScope.PlatformTabViewSection() {
                 title = "TabView Window",
                 icon = painterResource(Res.drawable.icon)
             ) {
-                val colors = FluentTheme.colors
-                FluentThemeConfiguration(
-                    useAcrylicPopup = store.enabledAcrylicPopup
-                ) {
-                    WindowFrame(
-                        onCloseRequest = { windowVisible.value = false },
-                        state = windowState,
-                        backButtonVisible = false,
-                        captionBarHeight = 40.dp,
-                    ) { _, captionBarInset ->
-                        val windowStore = LocalStore.current
-                        LaunchedEffect(colors.darkMode) {
-                            windowStore.darkMode = colors.darkMode
-                        }
-                        TabViewWindowContent(
+                WindowFrame(
+                    onCloseRequest = { windowVisible.value = false },
+                    state = windowState,
+                    backButtonVisible = false,
+                    captionBarHeight = 40.dp,
+                    store = store,
+                ) { _, captionBarInset ->
+                    TabViewWindowContent(
                             paddingInsets = WindowInsets(0),
                             header = {
                                 Spacer(
@@ -93,8 +89,7 @@ internal actual fun GalleryPageScope.PlatformTabViewSection() {
                                     )
                                 )
                             }
-                        )
-                    }
+                    )
                 }
             }
         }
