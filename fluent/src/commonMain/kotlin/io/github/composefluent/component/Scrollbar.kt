@@ -25,7 +25,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFirstOrNull
 import io.github.composefluent.FluentTheme
@@ -244,22 +246,19 @@ fun ScrollbarIndicator(
     val pressed by interaction.collectIsPressedAsState()
     val scrollScope = rememberCoroutineScope()
     val offset = with(LocalDensity.current) { ScrollbarDefaults.indicatorScrollOffset.toPx() }
-    val animationFraction by animateFloatAsState(
-        targetValue = if (visible) {
-            1f
-        } else {
-            0f
-        },
-        animationSpec = tween(FluentDuration.ShortDuration, easing = FluentEasing.FastInvokeEasing)
+    val animationFraction = animateFloatAsState(
+        targetValue = if (visible) 1f else 0f,
+        animationSpec = tween(FluentDuration.ShortDuration, easing = FluentEasing.FastInvokeEasing),
+        label = "scrollbar-indicator-alpha"
     )
-    val targetScale by animateFloatAsState(
-        if (pressed) {
+    val targetScale = animateFloatAsState(
+        targetValue = if (pressed) {
             ScrollbarDefaults.indicatorPressedScale
         } else {
             1f
-        }
+        },
+        label = "scrollbar-indicator-scale"
     )
-    val targetAlpha = animationFraction
     val tint = when {
         pressed -> colors.contentColorPressed
         hovered -> colors.contentColorHovered
@@ -290,19 +289,24 @@ fun ScrollbarIndicator(
                     }
                 }
             }.graphicsLayer {
-                scaleX = targetScale
-                scaleY = targetScale
-                alpha = targetAlpha
+                val scale = targetScale.value
+                scaleX = scale
+                scaleY = scale
+                alpha = animationFraction.value
             }) {
         CompositionLocalProvider(
             LocalContentColor provides tint,
             LocalContentAlpha provides tint.alpha
         ) {
+            val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
             FontIconSolid8(
                 type = when {
                     isVertical && forward -> FontIconPrimitive.CaretUp
                     isVertical -> FontIconPrimitive.CaretDown
+                    // Horizontal: keep LTR mapping, mirror glyphs in RTL.
+                    forward && isRtl -> FontIconPrimitive.CaretRight
                     forward -> FontIconPrimitive.CaretLeft
+                    isRtl -> FontIconPrimitive.CaretLeft
                     else -> FontIconPrimitive.CaretRight
                 },
                 contentDescription = null

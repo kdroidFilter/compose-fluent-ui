@@ -40,6 +40,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.composefluent.ExperimentalFluentApi
 import io.github.composefluent.FluentTheme
@@ -289,11 +293,12 @@ private fun PipsPager(
             )
         }
     } else {
+        val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
         Row(modifier = modifier.height(PipsPagerContainerHeight).hoverable(interactionSource)) {
 
             PageButton(
                 colors = pipsColors,
-                type = FontIconPrimitive.CaretLeft,
+                type = if (isRtl) FontIconPrimitive.CaretRight else FontIconPrimitive.CaretLeft,
                 onClick = { onSelectedIndexChange(selectedIndex - 1) },
                 enabled = enabled && selectedIndex > 0,
                 visible = pageButtonVisible,
@@ -320,7 +325,7 @@ private fun PipsPager(
 
             PageButton(
                 colors = pipsColors,
-                type = FontIconPrimitive.CaretRight,
+                type = if (isRtl) FontIconPrimitive.CaretLeft else FontIconPrimitive.CaretRight,
                 onClick = { onSelectedIndexChange(selectedIndex + 1) },
                 enabled = enabled && selectedIndex < count - 1,
                 visible = pageButtonVisible,
@@ -403,7 +408,8 @@ private fun Pips(
             2.dp
         } else {
             0.dp
-        }
+        },
+        label = "pips-size"
     )
     LaunchedEffect(selected) {
         if (selected) {
@@ -430,7 +436,11 @@ private fun Pips(
                 onClick = { onSelectedChange(!selected) }
             )
             .wrapContentSize(Alignment.Center)
-            .size(size.value)
+            .layout { measurable, _ ->
+                val px = size.value.roundToPx()
+                val placeable = measurable.measure(Constraints.fixed(px, px))
+                layout(px, px) { placeable.place(0, 0) }
+            }
             .background(currentColor, shape = CircleShape)
     )
 }

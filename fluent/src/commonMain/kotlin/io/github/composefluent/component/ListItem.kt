@@ -29,7 +29,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.LocalCompactMode
@@ -320,10 +325,18 @@ object ListItemDefaults {
      */
     @Composable
     fun CascadingIcon() {
+        val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
         FontIcon(
             type = FontIconPrimitive.ChevronRight,
             contentDescription = "cascading",
             size = FontIconSize.Small,
+            modifier = if (isRtl) {
+                Modifier.graphicsLayer {
+                    scaleX = -1f
+                }
+            } else {
+                Modifier
+            },
         )
     }
 
@@ -342,13 +355,22 @@ object ListItemDefaults {
         color: Color = FluentTheme.colors.fillAccent.default,
         disabledColor: Color = FluentTheme.colors.fillAccent.disabled
     ) {
-        val height by updateTransition(visible).animateDp(transitionSpec = {
-            if (targetState) tween(FluentDuration.ShortDuration, easing = FluentEasing.FastInvokeEasing)
-            else tween(FluentDuration.QuickDuration, easing = FluentEasing.SoftDismissEasing)
-        }, targetValueByState = { if (it) 16.dp else 0.dp })
+        val height = updateTransition(visible, label = "list-item-indicator").animateDp(
+            transitionSpec = {
+                if (targetState) tween(FluentDuration.ShortDuration, easing = FluentEasing.FastInvokeEasing)
+                else tween(FluentDuration.QuickDuration, easing = FluentEasing.SoftDismissEasing)
+            },
+            label = "indicator-height",
+            targetValueByState = { if (it) 16.dp else 0.dp }
+        )
         Box(
             modifier = Modifier
-                .size(width = 3.dp, height = height)
+                .layout { measurable, _ ->
+                    val w = 3.dp.roundToPx()
+                    val h = height.value.roundToPx()
+                    val placeable = measurable.measure(Constraints.fixed(w, h))
+                    layout(w, h) { placeable.place(0, 0) }
+                }
                 .background(
                     color = if (enabled) {
                         color

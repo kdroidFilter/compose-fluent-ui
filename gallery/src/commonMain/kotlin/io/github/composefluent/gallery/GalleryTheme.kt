@@ -15,6 +15,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BrushPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import io.github.composefluent.ExperimentalFluentApi
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.LocalContentColor
@@ -52,6 +54,9 @@ class Store(
     var compactMode by mutableStateOf(compactMode)
 
     var navigationDisplayMode by mutableStateOf(NavigationDisplayMode.Left)
+
+    /** Force RTL layout for gallery RTL testing (overrides system layout direction). */
+    var rtl by mutableStateOf(false)
 }
 
 @OptIn(ExperimentalFluentApi::class)
@@ -84,8 +89,10 @@ fun GalleryTheme(
             ThemeMode.Dark -> true
         }
     }
+    val layoutDirection = if (store.rtl) LayoutDirection.Rtl else LayoutDirection.Ltr
     CompositionLocalProvider(
-        LocalStore provides store
+        LocalStore provides store,
+        LocalLayoutDirection provides layoutDirection,
     ) {
         FluentTheme(
             colors = if (store.darkMode) darkColors() else lightColors(),

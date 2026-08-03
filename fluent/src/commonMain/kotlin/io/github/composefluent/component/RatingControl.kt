@@ -109,7 +109,6 @@ fun RatingControl(
                         if (isClearEnabled && value == targetValue) {
                             onValueChanged(0f)
                         } else {
-                            println(targetValue)
                             onValueChanged(targetValue)
                         }
                     }
@@ -362,33 +361,21 @@ private class RatingStarClipShape(
         density: Density
     ): Outline {
         val isRtl = layoutDirection == LayoutDirection.Rtl
-
-        return Outline.Rectangle(
-            if ((!isRtl && isStart) || isRtl) {
-                Rect(
-                    Offset.Zero,
-                    Size(
-                        size.width * if (!isRtl) {
-                            fraction
-                        } else {
-                            1 - fraction
-                        },
-                        size.height
-                    )
-                )
-            } else {
-                Rect(
-                    Offset(
-                        size.width * fraction,
-                        0f
-                    ),
-                    Size(
-                        size.width * (1 - fraction),
-                        size.height
-                    )
-                )
-            }
-        )
+        val f = fraction.coerceIn(0f, 1f)
+        // isStart = filled portion growing from logical start; otherwise the unfilled remainder.
+        val rect = when {
+            isStart && !isRtl -> Rect(Offset.Zero, Size(size.width * f, size.height))
+            isStart && isRtl -> Rect(
+                Offset(size.width * (1f - f), 0f),
+                Size(size.width * f, size.height)
+            )
+            !isStart && !isRtl -> Rect(
+                Offset(size.width * f, 0f),
+                Size(size.width * (1f - f), size.height)
+            )
+            else -> Rect(Offset.Zero, Size(size.width * (1f - f), size.height))
+        }
+        return Outline.Rectangle(rect)
     }
 
     override fun equals(other: Any?): Boolean {

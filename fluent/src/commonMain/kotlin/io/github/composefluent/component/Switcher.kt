@@ -7,7 +7,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -16,10 +15,11 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -30,9 +30,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.animation.FluentDuration
@@ -43,11 +44,15 @@ import io.github.composefluent.scheme.collectVisualState
 /**
  * A composable function that renders a Switcher UI element.
  *
+ * Thumb travel and label placement respect [LayoutDirection]: in RTL the thumb
+ * moves from right (off) to left (on), and `textBefore` places the label on the start side.
+ *
  * @param checked The current checked state of the Switcher.
  * @param onCheckStateChange A callback function invoked when the checked state changes.
  *   It receives the new checked state as a parameter.
  * @param text An optional text label to display alongside the Switcher.
  * @param textBefore Whether to display the text label before the Switcher (true) or after (false). Defaults to false.
+ *   "Before" means the start side (right in RTL).
  * @param enabled Whether the Switcher is enabled (true) or disabled (false). Defaults to true.
  * @param styles The visual styles to apply to the Switcher, defined by [SwitcherStyleScheme].
  *   Defaults to selected styles if [checked] is true, or default styles otherwise.
@@ -70,18 +75,18 @@ fun Switcher(
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
 ) {
     // TODO: Draggable
-    // TODO: Extract same logic
-    val transition = updateTransition(checked)
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val transition = updateTransition(targetState = checked, label = "switch-checked")
     val style = styles.schemeFor(interactionSource.collectVisualState(!enabled))
     Row(
-        modifier = Modifier.clickable(
-            indication = null,
+        modifier = Modifier.toggleable(
+            value = checked,
+            enabled = enabled,
+            role = Role.Switch,
             interactionSource = interactionSource,
-            role = Role.Button,
-            enabled = enabled
-        ) {
-            onCheckStateChange(!checked)
-        },
+            indication = null,
+            onValueChange = onCheckStateChange
+        ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (textBefore) {
@@ -96,8 +101,9 @@ fun Switcher(
         }
 
         val fillColor by animateColorAsState(
-            style.fillColor,
-            tween(FluentDuration.QuickDuration, easing = FluentEasing.FastInvokeEasing)
+            targetValue = style.fillColor,
+            animationSpec = tween(FluentDuration.QuickDuration, easing = FluentEasing.FastInvokeEasing),
+            label = "fill-color"
         )
 
         Box(
@@ -106,37 +112,39 @@ fun Switcher(
                 .clip(CircleShape)
                 .background(fillColor)
                 .padding(horizontal = 4.dp),
+            // CenterStart is left in LTR and right in RTL.
             contentAlignment = Alignment.CenterStart
         ) {
             val height by animateDpAsState(
-                style.controlSize.height,
-                tween(FluentDuration.QuickDuration, easing = FluentEasing.FastInvokeEasing)
+                targetValue = style.controlSize.height,
+                animationSpec = tween(FluentDuration.QuickDuration, easing = FluentEasing.FastInvokeEasing),
+                label = "thumb-height"
             )
 
             val width by animateDpAsState(
-                style.controlSize.width,
-                tween(FluentDuration.QuickDuration, easing = FluentEasing.FastInvokeEasing)
+                targetValue = style.controlSize.width,
+                animationSpec = tween(FluentDuration.QuickDuration, easing = FluentEasing.FastInvokeEasing),
+                label = "thumb-width"
             )
 
-            val density = LocalDensity.current
-            val offset by transition.animateDp(
+            // Keep State; read .value in graphicsLayer so travel does not recompose every frame.
+            val travel = transition.animateDp(
                 transitionSpec = {
                     tween(FluentDuration.QuickDuration, easing = FluentEasing.PointToPointEasing)
                 },
-                targetValueByState = {
-                    if (checked) 26.dp - (width / 2) else 0.dp
+                label = "thumb-offset",
+                targetValueByState = { isOn ->
+                    if (isOn) 26.dp - (width / 2) else 0.dp
                 }
             )
 
-            val offsetX by remember(density) {
-                derivedStateOf { with(density) { offset.toPx() } }
-            }
-
             // Control
             Box(
-                Modifier.size(width, height)
+                Modifier
+                    .size(width = width, height = height)
                     .graphicsLayer {
-                        translationX = offsetX
+                        val offsetX = travel.value.toPx()
+                        translationX = if (isRtl) -offsetX else offsetX
                         transformOrigin = TransformOrigin.Center
                     }
                     .clip(CircleShape)
@@ -270,6 +278,7 @@ typealias SwitcherStyleScheme = PentaVisualScheme<SwitcherStyle>
  * @property controlSize The size of the movable control within the switcher.
  * @property borderBrush The brush used to draw the border around the switcher's background.
  */
+@Immutable
 data class SwitcherStyle(
     val fillColor: Color,
     val labelColor: Color,

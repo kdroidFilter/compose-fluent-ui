@@ -56,6 +56,8 @@ import io.github.composefluent.gallery.ThemeMode
 import io.github.composefluent.gallery.WindowBackdropOption
 import io.github.composefluent.icons.Icons
 import io.github.composefluent.icons.regular.Desktop
+import io.github.composefluent.icons.regular.TextDirectionHorizontalLtr
+import io.github.composefluent.icons.regular.TextDirectionHorizontalRtl
 import io.github.composefluent.icons.regular.WeatherMoon
 import io.github.composefluent.icons.regular.WeatherSunny
 import org.jetbrains.skiko.hostOs
@@ -189,6 +191,7 @@ private fun DecoratedWindowScope.CaptionBar(
             )
         }
         Spacer(modifier = Modifier.weight(1f))
+        RtlModeButton(modifier = Modifier.noWindowDrag())
         ThemeModeButton(modifier = Modifier.noWindowDrag())
         // macOS shows the native traffic lights (left side, already reserved
         // via controlsInsets above) — composing WindowControls there as well
@@ -196,6 +199,27 @@ private fun DecoratedWindowScope.CaptionBar(
         if (!hostOs.isMacOS) {
             WindowControls(modifier = Modifier.noWindowDrag())
         }
+    }
+}
+
+/** Toggles gallery layout direction between LTR and RTL. */
+@OptIn(ExperimentalFoundationApi::class, ExperimentalFluentApi::class)
+@Composable
+private fun RtlModeButton(modifier: Modifier = Modifier) {
+    val store = LocalStore.current
+    val label = if (store.rtl) "Layout: RTL" else "Layout: LTR"
+    val icon = if (store.rtl) {
+        Icons.Regular.TextDirectionHorizontalRtl
+    } else {
+        Icons.Regular.TextDirectionHorizontalLtr
+    }
+    TooltipBox(tooltip = { Text(label) }) {
+        SubtleButton(
+            onClick = { store.rtl = !store.rtl },
+            iconOnly = true,
+            modifier = modifier,
+            content = { Icon(imageVector = icon, contentDescription = label) }
+        )
     }
 }
 

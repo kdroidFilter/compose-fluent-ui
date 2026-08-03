@@ -41,8 +41,11 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.compose.ui.window.PopupProperties
@@ -261,6 +264,7 @@ private fun SliderImpl(
 ) {
     var widthPx by remember { mutableStateOf(0) }
     val density by rememberUpdatedState(LocalDensity.current)
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     Box(
         content = {
@@ -290,7 +294,7 @@ private fun SliderImpl(
                 }
             }
             // .semantics {  } // TODO: Slider semantics
-            .pointerInput(enabled, state.onValueChange) {
+            .pointerInput(enabled, state.onValueChange, isRtl) {
                 if (enabled) awaitEachGesture {
                     val down = awaitFirstDown()
                     down.consume()
@@ -298,31 +302,22 @@ private fun SliderImpl(
                     val press = PressInteraction.Press(down.position)
                     interactionSource.tryEmit(press)
 
-                    // Fluent  Behavior: Press will immediately change the value
-                    state.startDragging(down.position, widthPx, density)
+                    // Fluent Behavior: Press will immediately change the value
+                    state.startDragging(down.position, widthPx, density, isRtl)
 
                     var change: PointerInputChange? = down
-
-                    // We don't need touch slop
-                    /*var change = awaitHorizontalTouchSlopOrCancellation(down.id) { change, overslop ->
-                        val delta = change.positionChange()
-                        change.consume()
-                        println("Slop: ${delta} $overslop")
-                        offset = Offset(x = offset.x + delta.x + overslop, y = offset.y)
-                        currentOnFractionChange(calcFraction(offset))
-                    }*/
 
                     while (change != null && change.pressed) {
                         change = awaitHorizontalDragOrCancellation(down.id)
                         if (change != null) {
                             val delta = change.positionChange()
                             change.consume()
-                            state.updateDelta(delta, widthPx, density)
+                            state.updateDelta(delta, widthPx, density, isRtl)
                         }
                     }
                     // Notify change finished
                     interactionSource.tryEmit(PressInteraction.Release(press))
-                    state.stopDragging(widthPx, density)
+                    state.stopDragging(widthPx, density, isRtl)
                 }
             }
     )
@@ -338,6 +333,7 @@ private fun SliderImpl(
  *   The callback receives the final value of the slider.
  * @param valueRange The range of values that the slider can represent.
  */
+@Stable
 class SliderState(
     value: Float = 0f,
     val steps: Int = 0,
@@ -346,11 +342,13 @@ class SliderState(
     val valueRange: ClosedFloatingPointRange<Float>
 ) {
     /**
-     * An array of fractions representing the positions of each step along the slider's track.
-     * The array includes the start (0.0f) and end (1.0f) positions, as well as the intermediate step positions.
-     * Used for snapping the slider's thumb to discrete values when steps are enabled.
+     * Number of tick marks including start and end endpoints (`steps + 2`).
+     * Prefer [stepFractionAt] over storing a [FloatArray] (unstable for Compose).
      */
-    val stepFractions = getStepFractions(steps)
+    val stepCount: Int = steps + 2
+
+    /** Fraction in `[0f, 1f]` for the tick at [index] (`0..steps + 1`). */
+    fun stepFractionAt(index: Int): Float = index.toFloat() / (steps + 1)
 
     private var valueState by mutableFloatStateOf(value)
     internal var onValueChange: ((Float) -> Unit)? = null
@@ -364,15 +362,11 @@ class SliderState(
     var value: Float
         set(newVal) {
             val coercedValue = newVal.coerceIn(valueRange.start, valueRange.endInclusive)
-            // We snap value at dragging ending instead of each dragging delta
-            /*val snappedValue =
-                snapValueToTick(
-                    coercedValue,
-                    tickFractions,
-                    valueRange.start,
-                    valueRange.endInclusive
-                )*/
             valueState = coercedValue
+            // Keep visual fraction in sync when value is set programmatically.
+            if (!isDragging) {
+                rawFraction = valueToFraction(coercedValue, valueRange)
+            }
         }
         get() = valueState
 
@@ -398,36 +392,41 @@ class SliderState(
     var rawFraction by mutableStateOf(valueToFraction(value, valueRange))
         private set
 
-    private fun setRawOffset(offset: Offset, width: Int, density: Density) {
+    private fun setRawOffset(offset: Offset, width: Int, density: Density, isRtl: Boolean) {
         this.rawOffset = offset
-        this.rawFraction = offsetToFraction(offset, width, density)
+        this.rawFraction = offsetToFraction(offset, width, density, isRtl)
     }
 
-    private fun setRawFraction(fraction: Float, width: Int, density: Density) {
+    private fun setRawFraction(fraction: Float, width: Int, density: Density, isRtl: Boolean) {
         this.rawFraction = fraction
         this.rawOffset =
-            Offset(x = fractionToOffset(fraction, width, density), y = this.rawOffset.y)
+            Offset(x = fractionToOffset(fraction, width, density, isRtl), y = this.rawOffset.y)
     }
 
-    internal fun startDragging(downOffset: Offset, width: Int, density: Density) {
-        setRawOffset(downOffset, width, density)
+    internal fun startDragging(downOffset: Offset, width: Int, density: Density, isRtl: Boolean) {
+        setRawOffset(downOffset, width, density, isRtl)
 
         this.isDragging = true
 
-        val fraction = offsetToFraction(downOffset, width, density)
+        val fraction = offsetToFraction(downOffset, width, density, isRtl)
         this.value = scaleToUserValue(fraction, this.valueRange)
         this.onValueChange?.invoke(this.value)
     }
 
-    internal fun updateDelta(delta: Offset, width: Int, density: Density) {
-        setRawOffset(Offset(x = this.rawOffset.x + delta.x, y = this.rawOffset.y), width, density)
+    internal fun updateDelta(delta: Offset, width: Int, density: Density, isRtl: Boolean) {
+        setRawOffset(
+            Offset(x = this.rawOffset.x + delta.x, y = this.rawOffset.y),
+            width,
+            density,
+            isRtl
+        )
 
-        val fraction = offsetToFraction(this.rawOffset, width, density)
+        val fraction = offsetToFraction(this.rawOffset, width, density, isRtl)
         this.value = scaleToUserValue(fraction, this.valueRange)
         this.onValueChange?.invoke(this.value)
     }
 
-    internal fun stopDragging(width: Int, density: Density) {
+    internal fun stopDragging(width: Int, density: Density, isRtl: Boolean) {
         if (this.steps > 0) {
             // Snap
             // TODO: Add snap animation, maybe we should use anchoredDraggable?
@@ -436,10 +435,10 @@ class SliderState(
                 val nearestValue = snapToNearestTickValue(currentValue)
                 val fraction = valueToFraction(nearestValue, this.valueRange)
                 this.value = nearestValue
-                setRawFraction(fraction, width, density)
+                setRawFraction(fraction, width, density, isRtl)
             } else {
                 val fraction = valueToFraction(currentValue, this.valueRange)
-                setRawFraction(fraction, width, density)
+                setRawFraction(fraction, width, density, isRtl)
             }
         }
 
@@ -448,43 +447,51 @@ class SliderState(
     }
 
     internal fun snapToNearestTickValue(value: Float): Float {
-        return this.stepFractions
-            .map { lerp(this.valueRange.start, this.valueRange.endInclusive, it) }
-            .minBy { abs(it - value) }
+        var best = value
+        var bestDist = Float.MAX_VALUE
+        val start = valueRange.start
+        val end = valueRange.endInclusive
+        for (i in 0 until stepCount) {
+            val candidate = lerp(start, end, stepFractionAt(i))
+            val dist = abs(candidate - value)
+            if (dist < bestDist) {
+                bestDist = dist
+                best = candidate
+            }
+        }
+        return best
     }
 
     /**
      * Calculates the nearest value to the current [value] from the predefined step fractions.
      *
-     * This function iterates through the [stepFractions], linearly interpolates the values within
-     * the [valueRange] based on these fractions, and then determines which of these interpolated
-     * values is closest to the current [value].
-     *
      * @return The nearest value to the current [value] based on the defined step fractions.
      */
-    fun nearestValue(): Float {
-        return this.stepFractions
-            .map { lerp(this.valueRange.start, this.valueRange.endInclusive, it) }
-            .minBy { abs(it - value) }
-    }
+    fun nearestValue(): Float = snapToNearestTickValue(value)
 }
 
-private fun getStepFractions(steps: Int): FloatArray {
-    return FloatArray(steps + 2) {
-        it.toFloat() / (steps + 1)
-    }
-}
-
-private fun fractionToOffset(fraction: Float, width: Int, density: Density): Float {
+private fun fractionToOffset(
+    fraction: Float,
+    width: Int,
+    density: Density,
+    isRtl: Boolean
+): Float {
     val thumbRadius = with(density) { (ThumbSizeWithBorder / 2).toPx() }
-    return lerp(thumbRadius, width - thumbRadius, fraction)
+    val visualFraction = if (isRtl) 1f - fraction else fraction
+    return lerp(thumbRadius, width - thumbRadius, visualFraction)
 }
 
 @Stable
-private fun offsetToFraction(offset: Offset, width: Int, density: Density): Float {
+private fun offsetToFraction(
+    offset: Offset,
+    width: Int,
+    density: Density,
+    isRtl: Boolean
+): Float {
     val thumbRadius = with(density) { (ThumbSizeWithBorder / 2).toPx() }
-
-    return valueToFraction(offset.x, thumbRadius..(width - thumbRadius)).coerceIn(0f, 1f)
+    val ltrFraction =
+        valueToFraction(offset.x, thumbRadius..(width - thumbRadius)).coerceIn(0f, 1f)
+    return if (isRtl) 1f - ltrFraction else ltrFraction
 }
 
 @Stable
@@ -624,6 +631,7 @@ object SliderDefaults {
      */
     @Composable
     fun Tick(modifier: Modifier, color: Color, state: SliderState, showTopTick: Boolean) {
+        val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
         Canvas(modifier) {
             // Start at center of the Thumb
             val scaledWidth =
@@ -634,8 +642,10 @@ object SliderDefaults {
             val tickThickness = TickThickness.toPx()
             val tickHeight = TickHeight.toPx()
 
-            for (stepFraction in state.stepFractions) {
-                val x = scaledWidth * stepFraction + startX
+            for (i in 0 until state.stepCount) {
+                val stepFraction = state.stepFractionAt(i)
+                val visualFraction = if (isRtl) 1f - stepFraction else stepFraction
+                val x = scaledWidth * visualFraction + startX
                 drawLine(
                     color = color,
                     start = Offset(x = x, y = tickY),
@@ -701,20 +711,19 @@ object SliderDefaults {
                         val width = maxOf(constraints.maxWidth, placeable.width)
                         val height = maxOf(constraints.maxHeight, placeable.height)
                         layout(width, height) {
-                            val offset = Alignment.CenterStart.align(
-                                size = IntSize(placeable.width, placeable.height),
-                                space = IntSize(width, height),
-                                layoutDirection = layoutDirection
-                            )
-                            placeable.place(
-                                x = offset.x + calcThumbOffset(
-                                    maxWidth = width,
-                                    thumbSize = ThumbSize.toPx(),
-                                    padding = 1.dp.toPx(),
-                                    fraction = state.rawFraction
-                                ).roundToInt(),
-                                y = offset.y + 0
-                            )
+                            // rawFraction is logical (0 = min value). Convert to visual X from left.
+                            val visualFraction = if (layoutDirection == LayoutDirection.Rtl) {
+                                1f - state.rawFraction
+                            } else {
+                                state.rawFraction
+                            }
+                            val travel = calcThumbOffset(
+                                maxWidth = width,
+                                thumbSize = ThumbSize.toPx(),
+                                padding = 1.dp.toPx(),
+                                fraction = visualFraction
+                            ).roundToInt()
+                            placeable.place(x = travel, y = (height - placeable.height) / 2)
                         }
                     }
                     .requiredSize(ThumbSizeWithBorder)
@@ -725,27 +734,36 @@ object SliderDefaults {
                 backgroundSizing = BackgroundSizing.InnerBorderEdge
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    // Inner Thumb
+                    val thumbSize = animateDpAsState(
+                        targetValue = when {
+                            pressed || state.isDragging -> InnerThumbPressedSize
+                            hovered -> InnerThumbHoverSize
+                            else -> InnerThumbSize
+                        },
+                        animationSpec = tween(
+                            FluentDuration.QuickDuration,
+                            easing = FluentEasing.FastInvokeEasing
+                        ),
+                        label = "slider-inner-thumb"
+                    )
+                    // Read animated size in layout so hover/press animation does not recompose parent.
                     Box(
-                        Modifier.size(
-                            animateDpAsState(
-                                when {
-                                    pressed || state.isDragging -> InnerThumbPressedSize
-                                    hovered -> InnerThumbHoverSize
-                                    else -> InnerThumbSize
-                                },
-                                tween(
-                                    FluentDuration.QuickDuration,
-                                    easing = FluentEasing.FastInvokeEasing
+                        Modifier
+                            .layout { measurable, _ ->
+                                val px = thumbSize.value.roundToPx()
+                                val placeable = measurable.measure(
+                                    Constraints.fixed(px, px)
                                 )
-                            ).value
-                        ).background(
-                            when {
-                                !enabled -> disabledColor
-                                pressed || state.isDragging -> draggingColor
-                                else -> color
-                            }, shape
-                        )
+                                layout(px, px) { placeable.place(0, 0) }
+                            }
+                            .background(
+                                when {
+                                    !enabled -> disabledColor
+                                    pressed || state.isDragging -> draggingColor
+                                    else -> color
+                                },
+                                shape
+                            )
                     )
                 }
                 if (state.isDragging) {
