@@ -8,6 +8,40 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.ksp)
     alias(libs.plugins.maven.publish)
+    alias(libs.plugins.stability.analyzer)
+}
+
+// Compiler reports: ./gradlew :fluent:compileKotlinDesktop -PcomposeReports=true
+// Stability baseline:  ./gradlew :fluent:compileKotlinDesktop :fluent:stabilityDump
+// Regression check:    ./gradlew :fluent:stabilityCheck
+composeCompiler {
+    stabilityConfigurationFiles.add(
+        rootProject.layout.projectDirectory.file("compose_stability.conf")
+    )
+    if (providers.gradleProperty("composeReports").orNull == "true") {
+        reportsDestination = layout.buildDirectory.dir("compose_compiler")
+        metricsDestination = layout.buildDirectory.dir("compose_compiler")
+    }
+}
+
+composeStabilityAnalyzer {
+    // Library modules: static stability validation only (no runtime trace-all).
+    stabilityValidation {
+        enabled.set(true)
+        outputDir.set(layout.projectDirectory.dir("stability"))
+        includeTests.set(false)
+        failOnStabilityChange.set(true)
+        // Allow first-time clone without baseline to compile; CI can still require the file.
+        allowMissingBaseline.set(providers.environmentVariable("CI").orNull != "true")
+        stabilityConfigurationFiles.add(
+            rootProject.layout.projectDirectory.file("compose_stability.conf")
+        )
+        ignoredClasses.set(
+            listOf(
+                // Previews / internal debug helpers if added later
+            )
+        )
+    }
 }
 
 group = BuildConfig.group

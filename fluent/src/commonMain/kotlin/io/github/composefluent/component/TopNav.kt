@@ -233,12 +233,9 @@ fun TopNavItem(
                     icon = icon,
                     trailing = items?.let {
                         {
-                            val rotation by animateFloatAsState(
-                                if (flyoutVisible) {
-                                    180f
-                                } else {
-                                    00f
-                                }
+                            val rotation = animateFloatAsState(
+                                targetValue = if (flyoutVisible) 180f else 0f,
+                                label = "topnav-chevron-rotation"
                             )
                             FontIcon(
                                 type = FontIconPrimitive.ChevronDown,
@@ -246,7 +243,7 @@ fun TopNavItem(
                                 contentDescription = null,
                                 modifier = Modifier
                                     .graphicsLayer {
-                                        rotationZ = rotation
+                                        rotationZ = rotation.value
                                     }
                             )
                         }

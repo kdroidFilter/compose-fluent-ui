@@ -14,7 +14,39 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.ksp)
     alias(libs.plugins.build.konfig)
+    alias(libs.plugins.stability.analyzer)
     id("dev.nucleusframework") version "dev"
+}
+
+composeCompiler {
+    stabilityConfigurationFiles.add(
+        rootProject.layout.projectDirectory.file("compose_stability.conf")
+    )
+    if (providers.gradleProperty("composeReports").orNull == "true") {
+        reportsDestination = layout.buildDirectory.dir("compose_compiler")
+        metricsDestination = layout.buildDirectory.dir("compose_compiler")
+    }
+}
+
+composeStabilityAnalyzer {
+    // Gallery: opt-in module-wide recomposition tracing for IDE Heatmap / Doctor.
+    // Gated at runtime by ComposeStabilityAnalyzer.setEnabled(...) in Main.
+    traceAll {
+        enabled.set(true)
+        threshold.set(3)
+        // KMP/desktop has no Android variants; runtime enable gate is the safety net.
+        variants.set(listOf("debug", "desktop"))
+    }
+    stabilityValidation {
+        enabled.set(true)
+        outputDir.set(layout.projectDirectory.dir("stability"))
+        includeTests.set(false)
+        failOnStabilityChange.set(true)
+        allowMissingBaseline.set(providers.environmentVariable("CI").orNull != "true")
+        stabilityConfigurationFiles.add(
+            rootProject.layout.projectDirectory.file("compose_stability.conf")
+        )
+    }
 }
 
 kotlin {

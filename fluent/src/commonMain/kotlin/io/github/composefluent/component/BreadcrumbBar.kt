@@ -12,7 +12,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.LocalContentAlpha
@@ -426,10 +429,19 @@ private fun BasicBreadcrumbBarItem(
                 LocalContentAlpha provides chevronColor.alpha,
                 LocalTextStyle provides LocalTextStyle.current.copy(chevronColor)
             ) {
+                val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
                 FontIcon(
                     type = FontIconPrimitive.ChevronRight,
                     contentDescription = null,
-                    modifier = Modifier.padding(horizontal = 4.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 4.dp)
+                        .then(
+                            if (isRtl) {
+                                Modifier.graphicsLayer { scaleX = -1f }
+                            } else {
+                                Modifier
+                            }
+                        ),
                     size = chevronSize
                 )
             }

@@ -22,6 +22,7 @@ import androidx.compose.foundation.pager.PagerScope
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
@@ -34,8 +35,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.composefluent.ExperimentalFluentApi
 import io.github.composefluent.FluentTheme
@@ -355,10 +358,12 @@ private fun FlipViewContainer(
                     .hoverable(interactionSource),
             )
         } else {
+            val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
             PageButton(
                 colors = pageButtonColors,
                 isVertical = false,
-                type = FontIconPrimitive.CaretRight,
+                // Point toward logical end (next); reverse glyph in RTL.
+                type = if (isRtl) FontIconPrimitive.CaretLeft else FontIconPrimitive.CaretRight,
                 onClick = onNextPageClick,
                 visible = nextPageVisible && isHovered.value,
                 modifier = Modifier
@@ -370,7 +375,7 @@ private fun FlipViewContainer(
             PageButton(
                 colors = pageButtonColors,
                 isVertical = false,
-                type = FontIconPrimitive.CaretLeft,
+                type = if (isRtl) FontIconPrimitive.CaretRight else FontIconPrimitive.CaretLeft,
                 onClick = onPreviousPageClick,
                 visible = previousPageVisible && isHovered.value,
                 modifier = Modifier
@@ -438,6 +443,7 @@ private fun MaterialContainerScope.PageButton(
  * @property background The background [Material] for the page button.
  * @property contentColor The [Color] of the content (icon) within the page button.
  */
+@Immutable
 data class PageButtonColor(
     val background: Material,
     val contentColor: Color
