@@ -1,18 +1,17 @@
 [versions]
 activityCompose = "1.10.1"
 haze = "1.6.6"
-kotlin = "2.2.0"
-ksp = "2.2.0-2.0.2"
-compose = "1.8.2"
-androidGradlePlugin = "8.10.0"
+kotlin = "2.4.0"
+ksp = "2.3.10"
+compose = "1.11.1"
+androidGradlePlugin = "8.13.2"
 androidBuildTools = "31.7.2"
-windowStyler = "0.3.3-SNAPSHOT"
 highlights = "1.0.0"
 kotlinx-datetime = "0.7.1"
-jna = "5.16.0"
 buildKonfig = "0.17.1"
 mavenPublish = "0.33.0"
-hot-reload = "1.0.0-beta03"
+hot-reload = "1.1.1"
+nucleus = "dev"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
@@ -27,10 +26,12 @@ google-guava = "com.google.guava:guava:33.2.1-jre"
 squareup-kotlinpoet = "com.squareup:kotlinpoet:2.1.0"
 android-tools-common = { module = "com.android.tools:common", version.ref = "androidBuildTools" }
 android-tools-sdk-common = { module = "com.android.tools:sdk-common", version.ref = "androidBuildTools" }
-window-styler = { module = "com.mayakapps.compose:window-styler", version.ref = "windowStyler" }
 highlights = { module = "dev.snipme:highlights", version.ref = "highlights" }
-jna-platform = { module = "net.java.dev.jna:jna-platform-jpms", version.ref = "jna" }
-jna = { module = "net.java.dev.jna:jna-jpms", version.ref = "jna" }
+nucleus-application = { module = "dev.nucleusframework:nucleus.nucleus-application", version.ref = "nucleus" }
+nucleus-window-tao = { module = "dev.nucleusframework:nucleus.decorated-window-tao", version.ref = "nucleus" }
+nucleus-core-runtime = { module = "dev.nucleusframework:nucleus.core-runtime", version.ref = "nucleus" }
+nucleus-graalvm-runtime = { module = "dev.nucleusframework:nucleus.graalvm-runtime", version.ref = "nucleus" }
+nucleus-darkmode-detector = { module = "dev.nucleusframework:nucleus.darkmode-detector", version.ref = "nucleus" }
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -28,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -70,6 +72,12 @@ fun App(
     windowInset: WindowInsets = WindowInsets(0),
     contentInset: WindowInsets = WindowInsets(0),
     collapseWindowInset: WindowInsets = WindowInsets(0),
+    // When the collapsed nav header is merged into a desktop window's title
+    // bar (see gallery WindowFrame), these opt the back/hamburger buttons out
+    // of the title bar's window-drag region so presses reach them instead of
+    // arming a window drag.
+    collapsedBackButtonModifier: Modifier = Modifier,
+    collapsedExpandButtonModifier: Modifier = Modifier,
     icon: Painter? = null,
     title: String = "",
 ) {
@@ -98,12 +106,35 @@ fun App(
     }
     val store = LocalStore.current
     val isCollapsed = store.navigationDisplayMode == NavigationDisplayMode.LeftCollapsed
+    // Canonical WinUI layering: over a native backdrop the navigation surface
+    // gets a semi-opaque layer fill so text never sits raw on the material
+    // (critical for Acrylic, whose blur makes unshielded text unreadable).
+    // The fill is semi-transparent, so the material still shows through it,
+    // and the window-level fill stays untouched.
+    val backdropLayerColor = if (supportsWindowBackdrop) {
+        when (store.windowBackdrop) {
+            WindowBackdropOption.Acrylic -> FluentTheme.colors.background.layerOnAcrylic.default
+            WindowBackdropOption.Mica,
+            WindowBackdropOption.MicaAlt -> FluentTheme.colors.background.layerOnMicaBaseAlt.secondary
+            WindowBackdropOption.Default,
+            WindowBackdropOption.None -> Color.Transparent
+        }
+    } else {
+        Color.Transparent
+    }
+    val navigationState = rememberNavigationState()
     NavigationView(
         modifier = Modifier.windowInsetsPadding(
             insets = if (isCollapsed) collapseWindowInset else windowInset
-        ),
-        state = rememberNavigationState(),
+        ).background(backdropLayerColor),
+        state = navigationState,
         displayMode = store.navigationDisplayMode,
+        expandedButton = {
+            NavigationDefaults.ExpandedButton(
+                onClick = { navigationState.expanded = !navigationState.expanded },
+                modifier = collapsedExpandButtonModifier
+            )
+        },
         contentPadding = if (!isCollapsed) {
             PaddingValues()
         } else {
@@ -154,7 +185,9 @@ fun App(
                     },
                     disabled = !navigator.canNavigateUp,
                     icon = { Icon(Icons.Default.ArrowLeft, contentDescription = null) },
-                    modifier = Modifier.windowInsetsPadding(contentInset.only(WindowInsetsSides.Start))
+                    modifier = Modifier
+                        .windowInsetsPadding(contentInset.only(WindowInsetsSides.Start))
+                        .then(collapsedBackButtonModifier)
                 )
             }
         },

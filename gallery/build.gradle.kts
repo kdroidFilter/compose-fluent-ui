@@ -1,8 +1,9 @@
 import com.android.build.api.variant.impl.VariantOutputImpl
 import com.codingfeline.buildkonfig.compiler.FieldSpec
+import dev.nucleusframework.desktop.application.dsl.CompressionLevel
+import dev.nucleusframework.desktop.application.dsl.TargetFormat
 import io.github.composefluent.plugin.build.BuildConfig
 import io.github.composefluent.plugin.build.applyTargets
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 plugins {
@@ -13,6 +14,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.ksp)
     alias(libs.plugins.build.konfig)
+    id("dev.nucleusframework") version "dev"
 }
 
 kotlin {
@@ -20,8 +22,8 @@ kotlin {
     wasmJs { binaries.executable() }
     js { binaries.executable() }
 
+    // iosX64 dropped: Compose Multiplatform 1.11 no longer publishes iosx64 artifacts.
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach {
@@ -56,9 +58,12 @@ kotlin {
         named("desktopMain").dependencies {
             implementation(compose.desktop.currentOs)
             implementation(compose.preview)
-            implementation(libs.window.styler)
-            implementation(libs.jna.platform)
-            implementation(libs.jna)
+            implementation(libs.nucleus.application)
+            implementation(libs.nucleus.window.tao)
+            implementation(libs.nucleus.graalvm.runtime)
+            // Live OS dark mode for ThemeMode.System (Tao has no AWT LocalSystemTheme).
+            implementation(libs.nucleus.darkmode.detector)
+            implementation(project(":decorated-window-fluent"))
         }
     }
 }
@@ -131,36 +136,18 @@ android {
     }
 }
 
-compose.desktop {
-    application {
-        mainClass = "${BuildConfig.packageName}.gallery.MainKt"
-        buildTypes.release.proguard {
-            configurationFiles.from(
-                project.file("proguard-rules.desktop.pro"),
-                project.file("proguard-rules.common.pro")
-            )
-        }
-        nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "Compose Fluent Design Gallery"
-            packageVersion = BuildConfig.integerVersionName
-            macOS {
-                iconFile.set(project.file("icons/icon.icns"))
-                jvmArgs(
-                    "-Dapple.awt.application.appearance=system"
-                )
-            }
-            windows {
-                iconFile.set(project.file("icons/icon.ico"))
-                upgradeUuid = "a23572e1-c6fd-4b76-98ec-1e45953eb941"
-                shortcut = true
-                menu = true
-                perUserInstall = true
-            }
-            linux {
-                iconFile.set(project.file("icons/icon.png"))
-            }
-        }
+nucleus.application {
+    mainClass = "${BuildConfig.packageName}.gallery.MainKt"
+    nativeDistributions {
+        packageName = "compose-fluent-gallery"
+        packageVersion = "1.0.0"
+        targetFormats(TargetFormat.Dmg, TargetFormat.Nsis, TargetFormat.Deb)
+        compressionLevel = CompressionLevel.Ultra
+    }
+    graalvm {
+        isEnabled = true
+        javaLanguageVersion = 25
+        imageName = "compose-fluent-gallery"
     }
 }
 

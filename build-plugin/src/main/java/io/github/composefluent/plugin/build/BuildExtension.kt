@@ -23,7 +23,7 @@ fun KotlinMultiplatformExtension.applyTargets(namespaceModule: String = "") {
     jvmToolchain(BuildConfig.Jvm.jvmToolchainVersion)
     wasmJs { browser() }
     js { browser() }
-    iosX64()
+    // iosX64 dropped: Compose Multiplatform 1.11 no longer publishes iosx64 artifacts.
     iosArm64()
     iosSimulatorArm64()
 

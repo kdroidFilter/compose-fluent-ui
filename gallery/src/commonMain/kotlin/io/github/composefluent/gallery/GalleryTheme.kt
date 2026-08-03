@@ -1,7 +1,6 @@
 package io.github.composefluent.gallery
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -26,12 +25,27 @@ import io.github.composefluent.lightColors
 
 val LocalStore = compositionLocalOf<Store> { error("Not provided") }
 
+/** Tri-state theme selection: follow the OS, or force light/dark. */
+enum class ThemeMode { System, Light, Dark }
+
+/**
+ * Window backdrop material, mirroring Nucleus's `WindowsBackdropStyle`.
+ * Declared platform-neutrally so the Settings screen (commonMain) can offer it;
+ * only the desktop Windows window frame acts on it.
+ */
+enum class WindowBackdropOption { Default, None, Mica, Acrylic, MicaAlt }
+
 class Store(
     systemDarkMode: Boolean,
     enabledAcrylicPopup: Boolean,
     compactMode: Boolean
 ) {
+    /** Resolved dark-mode flag; kept in sync with [themeMode] by [GalleryTheme]. */
     var darkMode by mutableStateOf(systemDarkMode)
+
+    var themeMode by mutableStateOf(ThemeMode.System)
+
+    var windowBackdrop by mutableStateOf(WindowBackdropOption.Mica)
 
     var enabledAcrylicPopup by mutableStateOf(enabledAcrylicPopup)
 
@@ -44,11 +58,18 @@ class Store(
 @Composable
 fun GalleryTheme(
     displayMicaLayer: Boolean = true,
+    // Pass an existing store to share state across windows (Tao windows own
+    // separate compositions, so CompositionLocals do not cross them).
+    store: Store? = null,
     content: @Composable () -> Unit
 ) {
-    val systemDarkMode = isSystemInDarkTheme()
+    // Desktop (Tao): Nucleus darkmode-detector — Compose's isSystemInDarkTheme
+    // reads Skiko/LocalSystemTheme which is unreliable without an AWT frame.
+    // Other targets: Compose foundation isSystemInDarkTheme.
+    val systemDarkMode = platformSystemInDarkMode()
 
-    val store = remember {
+    @Suppress("NAME_SHADOWING")
+    val store = store ?: remember {
         Store(
             systemDarkMode = systemDarkMode,
             enabledAcrylicPopup = true,
@@ -56,8 +77,12 @@ fun GalleryTheme(
         )
     }
 
-    LaunchedEffect(systemDarkMode) {
-        store.darkMode = systemDarkMode
+    LaunchedEffect(systemDarkMode, store.themeMode) {
+        store.darkMode = when (store.themeMode) {
+            ThemeMode.System -> systemDarkMode
+            ThemeMode.Light -> false
+            ThemeMode.Dark -> true
+        }
     }
     CompositionLocalProvider(
         LocalStore provides store

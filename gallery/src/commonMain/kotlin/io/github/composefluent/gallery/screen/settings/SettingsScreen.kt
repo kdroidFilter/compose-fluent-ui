@@ -39,6 +39,9 @@ import io.github.composefluent.component.Text
 import io.github.composefluent.component.rememberScrollbarAdapter
 import io.github.composefluent.gallery.LocalStore
 import io.github.composefluent.gallery.ProjectUrl
+import io.github.composefluent.gallery.ThemeMode
+import io.github.composefluent.gallery.WindowBackdropOption
+import io.github.composefluent.gallery.supportsWindowBackdrop
 import io.github.composefluent.gallery.component.ComponentItem
 import io.github.composefluent.gallery.component.ComponentNavigator
 import io.github.composefluent.gallery.screen.test.TestComponentScreen
@@ -49,6 +52,7 @@ import io.github.composefluent.icons.regular.ChevronRight
 import io.github.composefluent.icons.regular.Color
 import io.github.composefluent.icons.regular.List
 import io.github.composefluent.icons.regular.Navigation
+import io.github.composefluent.icons.regular.PaintBrush
 import fluentdesign.gallery.generated.resources.Res
 import fluentdesign.gallery.generated.resources.icon
 import org.jetbrains.compose.resources.painterResource
@@ -87,14 +91,66 @@ fun SettingsScreen(componentNavigator: ComponentNavigator) {
                         Text("Select which app theme to display")
                     },
                     trailing = {
-                        Switcher(
-                            checked = store.darkMode,
-                            text = if (store.darkMode) "Dark" else "Light",
-                            textBefore = true,
-                            onCheckStateChange = { store.darkMode = it }
+                        MenuFlyoutContainer(
+                            flyout = {
+                                ThemeMode.entries.forEach { mode ->
+                                    MenuFlyoutItem(
+                                        selected = mode == store.themeMode,
+                                        onSelectedChanged = {
+                                            store.themeMode = mode
+                                            isFlyoutVisible = false
+                                        },
+                                        text = { Text(mode.name) }
+                                    )
+                                }
+                            },
+                            content = {
+                                DropDownButton(
+                                    onClick = { isFlyoutVisible = true },
+                                    content = { Text(store.themeMode.name) }
+                                )
+                            }
                         )
                     }
                 )
+                if (supportsWindowBackdrop) {
+                    CardExpanderItem(
+                        heading = {
+                            Text("Window Backdrop")
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Regular.PaintBrush,
+                                contentDescription = "Backdrop"
+                            )
+                        },
+                        caption = {
+                            Text("Select the native window material (Windows 11)")
+                        },
+                        trailing = {
+                            MenuFlyoutContainer(
+                                flyout = {
+                                    WindowBackdropOption.entries.forEach { option ->
+                                        MenuFlyoutItem(
+                                            selected = option == store.windowBackdrop,
+                                            onSelectedChanged = {
+                                                store.windowBackdrop = option
+                                                isFlyoutVisible = false
+                                            },
+                                            text = { Text(option.name) }
+                                        )
+                                    }
+                                },
+                                content = {
+                                    DropDownButton(
+                                        onClick = { isFlyoutVisible = true },
+                                        content = { Text(store.windowBackdrop.name) }
+                                    )
+                                }
+                            )
+                        }
+                    )
+                }
                 CardExpanderItem(
                     heading = {
                         Text("Acrylic Flyout")
