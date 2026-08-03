@@ -4,6 +4,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowPosition
@@ -13,6 +14,7 @@ import dev.nucleusframework.application.nucleusApplication
 import dev.nucleusframework.darkmodedetector.getPlatformDarkModeDetector
 import dev.nucleusframework.graalvm.GraalVmInitializer
 import dev.nucleusframework.window.fluent.FluentDecoratedWindow
+import dev.nucleusframework.window.noWindowDrag
 import fluentdesign.gallery.generated.resources.Res
 import fluentdesign.gallery.generated.resources.icon
 import io.github.composefluent.ExperimentalFluentApi
@@ -87,6 +89,8 @@ fun main() {
                         App(
                             windowInset = windowInset,
                             contentInset = contentInset,
+                            collapsedBackButtonModifier = Modifier.noWindowDrag(),
+                            collapsedExpandButtonModifier = Modifier.noWindowDrag(),
                             navigator = navigator,
                             title = title,
                             icon = icon

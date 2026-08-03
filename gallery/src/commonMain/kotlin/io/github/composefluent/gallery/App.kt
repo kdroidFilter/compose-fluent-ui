@@ -72,6 +72,12 @@ fun App(
     windowInset: WindowInsets = WindowInsets(0),
     contentInset: WindowInsets = WindowInsets(0),
     collapseWindowInset: WindowInsets = WindowInsets(0),
+    // When the collapsed nav header is merged into a desktop window's title
+    // bar (see gallery WindowFrame), these opt the back/hamburger buttons out
+    // of the title bar's window-drag region so presses reach them instead of
+    // arming a window drag.
+    collapsedBackButtonModifier: Modifier = Modifier,
+    collapsedExpandButtonModifier: Modifier = Modifier,
     icon: Painter? = null,
     title: String = "",
 ) {
@@ -116,12 +122,19 @@ fun App(
     } else {
         Color.Transparent
     }
+    val navigationState = rememberNavigationState()
     NavigationView(
         modifier = Modifier.windowInsetsPadding(
             insets = if (isCollapsed) collapseWindowInset else windowInset
         ).background(backdropLayerColor),
-        state = rememberNavigationState(),
+        state = navigationState,
         displayMode = store.navigationDisplayMode,
+        expandedButton = {
+            NavigationDefaults.ExpandedButton(
+                onClick = { navigationState.expanded = !navigationState.expanded },
+                modifier = collapsedExpandButtonModifier
+            )
+        },
         contentPadding = if (!isCollapsed) {
             PaddingValues()
         } else {
@@ -172,7 +185,9 @@ fun App(
                     },
                     disabled = !navigator.canNavigateUp,
                     icon = { Icon(Icons.Default.ArrowLeft, contentDescription = null) },
-                    modifier = Modifier.windowInsetsPadding(contentInset.only(WindowInsetsSides.Start))
+                    modifier = Modifier
+                        .windowInsetsPadding(contentInset.only(WindowInsetsSides.Start))
+                        .then(collapsedBackButtonModifier)
                 )
             }
         },
