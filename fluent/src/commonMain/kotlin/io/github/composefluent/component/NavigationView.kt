@@ -147,6 +147,7 @@ fun rememberNavigationState(
  * @param initialExpanded The initial expanded state of the navigation view.
  * @param initialOffset The initial offset of the indicator.
  */
+@Stable
 class NavigationState(
     initialExpanded: Boolean,
     initialOffset: Offset
@@ -1461,6 +1462,7 @@ fun rememberIndicatorState(initialOffset: Offset = Offset.Zero): IndicatorState 
  *
  * @property initialOffset The initial offset of the indicator.
  */
+@Stable
 class IndicatorState(initialOffset: Offset) {
     /**
      * The state of the selected item indicator.
@@ -1540,20 +1542,25 @@ internal fun Modifier.indicatorOffsetAnimation(
     selectedPosition: MutableTransitionState<Offset>,
     isVertical: Boolean = true
 ): Modifier {
-    val fraction by rememberTransition(indicatorState).animateFloat(
+    // Keep State; read .value inside layout so indicator animation does not recompose every frame.
+    val fraction = rememberTransition(indicatorState, label = "indicator-visibility").animateFloat(
         transitionSpec = {
             tween(FluentDuration.VeryLongDuration, easing = FluentEasing.PointToPointEasing)
         },
+        label = "indicator-fraction",
         targetValueByState = { if (it) 1f else 0f }
     )
-    //Delay set selected position
+    // Drive selected-position transition while indicator is shown (animates layout via selectedPosition state).
     if (indicatorState.isIdle && indicatorState.targetState) {
-        rememberTransition(selectedPosition).animateFloat(transitionSpec = {
-            tween(
-                FluentDuration.QuickDuration,
-                easing = FluentEasing.FastInvokeEasing
-            )
-        }) { if (isVertical) it.y else it.x }
+        rememberTransition(selectedPosition, label = "selected-position").animateFloat(
+            transitionSpec = {
+                tween(
+                    FluentDuration.QuickDuration,
+                    easing = FluentEasing.FastInvokeEasing
+                )
+            },
+            label = "selected-position-axis"
+        ) { if (isVertical) it.y else it.x }
     }
     return layout { measurable, constraints ->
         val stickSize = size.toPx()
@@ -1569,10 +1576,11 @@ internal fun Modifier.indicatorOffsetAnimation(
         }
         val contentPadding = ((containerSize - stickSize) / 2).coerceAtLeast(0f)
         val extendSize = containerSize - contentPadding
+        val fractionValue = fraction.value
         val currentFraction = if (indicatorState.targetState) {
-            fraction
+            fractionValue
         } else {
-            1 - fraction
+            1 - fractionValue
         }
         val segmentFraction = when {
             currentFraction > 0.75 -> (currentFraction - 0.75f) * 4

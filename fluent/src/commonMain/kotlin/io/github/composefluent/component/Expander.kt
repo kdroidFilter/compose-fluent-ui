@@ -93,11 +93,14 @@ fun Expander(
                         interaction = targetInteractionSource,
                         onClick = { onExpandedChanged(!expanded) },
                         content = {
-                            val degrees by animateFloatAsState(if (expanded) 180f else 0f)
+                            val degrees = animateFloatAsState(
+                                targetValue = if (expanded) 180f else 0f,
+                                label = "expander-chevron"
+                            )
                             FontIcon(
                                 type = FontIconPrimitive.ChevronDown,
                                 contentDescription = null,
-                                modifier = Modifier.graphicsLayer { rotationZ = degrees }
+                                modifier = Modifier.graphicsLayer { rotationZ = degrees.value }
                             )
                         },
                         iconOnly = true,

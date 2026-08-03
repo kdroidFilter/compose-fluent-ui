@@ -23,6 +23,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -88,14 +90,20 @@ fun RadioButton(
         ) {
             Box(contentAlignment = FixedCenterAlignment) {
                 // Bullet, Only displays when selected, or is pressed
-
-                val size by animateDpAsState(
-                    style.dotSize,
-                    tween(FluentDuration.QuickDuration, easing = FluentEasing.FastInvokeEasing)
+                val size = animateDpAsState(
+                    targetValue = style.dotSize,
+                    animationSpec = tween(FluentDuration.QuickDuration, easing = FluentEasing.FastInvokeEasing),
+                    label = "radio-dot-size"
                 )
-                // Inner
+                // Inner — size animation read in layout phase
                 Layer(
-                    modifier = Modifier.size(if (size == 0.dp || !selected) size else size + 2.dp), // TODO: Remove this 2dp if outside border is provided
+                    modifier = Modifier.layout { measurable, _ ->
+                        val animated = size.value
+                        val target = if (animated == 0.dp || !selected) animated else animated + 2.dp
+                        val px = target.roundToPx()
+                        val placeable = measurable.measure(Constraints.fixed(px, px))
+                        layout(px, px) { placeable.place(0, 0) }
+                    },
                     shape = CircleShape,
                     color = style.dotColor,
                     border = if (selected) BorderStroke(
