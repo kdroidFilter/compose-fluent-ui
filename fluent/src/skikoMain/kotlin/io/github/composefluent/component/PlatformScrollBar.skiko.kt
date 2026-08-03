@@ -27,8 +27,9 @@ import androidx.compose.foundation.text.TextFieldScrollState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.lerp
 import io.github.composefluent.animation.FluentDuration
 import io.github.composefluent.animation.FluentEasing
 import kotlinx.coroutines.delay
@@ -67,32 +68,28 @@ internal actual fun PlatformScrollBar(
         }
     }
 
-    val animationFraction by animateFloatAsState(
-        targetValue = if (isThicknessHighLight) {
-            1f
-        } else {
-            0f
-        },
-        animationSpec = tween(FluentDuration.ShortDuration, easing = FluentEasing.FastInvokeEasing)
-    )
-    val thickness = lerp(
-        ScrollbarDefaults.thickness,
-        ScrollbarDefaults.thicknessHighlight,
-        animationFraction
+    // Keep State; avoid per-frame ScrollbarStyle allocation / composition from thickness lerp.
+    val animationFraction = animateFloatAsState(
+        targetValue = if (isThicknessHighLight) 1f else 0f,
+        animationSpec = tween(FluentDuration.ShortDuration, easing = FluentEasing.FastInvokeEasing),
+        label = "scrollbar-thickness"
     )
 
-    val style = ScrollbarStyle(
-        thickness = thickness,
-        unhoverColor = colors.contentColor,
-        hoverColor = if (pressed || dragged || focused) {
-            colors.contentColorPressed
-        } else {
-            colors.contentColorHovered
-        },
-        hoverDurationMillis = FluentDuration.ShortDuration,
-        shape = ScrollbarDefaults.shape,
-        minimalHeight = 16.dp
-    )
+    val style = remember(pressed, dragged, focused, colors) {
+        ScrollbarStyle(
+            // Fixed highlight thickness — track alpha animates separately.
+            thickness = ScrollbarDefaults.thicknessHighlight,
+            unhoverColor = colors.contentColor,
+            hoverColor = if (pressed || dragged || focused) {
+                colors.contentColorPressed
+            } else {
+                colors.contentColorHovered
+            },
+            hoverDurationMillis = FluentDuration.ShortDuration,
+            shape = ScrollbarDefaults.shape,
+            minimalHeight = 16.dp
+        )
+    }
 
     val scrollScope = rememberCoroutineScope()
     val scrollbarScrollState = rememberScrollableState {
@@ -101,16 +98,20 @@ internal actual fun PlatformScrollBar(
         }
         it
     }
-    val trackColor = colors.backgroundColor.copy(animationFraction)
+    val trackColor = colors.backgroundColor
+    // Draw track alpha in draw phase so hover animation does not rebuild ScrollbarStyle.
+    val trackModifier = Modifier.drawBehind {
+        drawRoundRect(
+            color = trackColor.copy(alpha = animationFraction.value),
+            cornerRadius = CornerRadius(size.minDimension / 2f)
+        )
+    }
     if (isVertical) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.hoverable(containerInteraction)
                 .width(12.dp)
-                .background(
-                    color = trackColor,
-                    shape = CircleShape
-                )
+                .then(trackModifier)
                 .scrollable(
                     state = scrollbarScrollState,
                     orientation = Orientation.Vertical,
@@ -146,10 +147,7 @@ internal actual fun PlatformScrollBar(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.hoverable(containerInteraction)
                 .height(12.dp)
-                .background(
-                    color = trackColor,
-                    shape = CircleShape
-                )
+                .then(trackModifier)
                 .scrollable(
                     state = scrollbarScrollState,
                     orientation = Orientation.Horizontal,

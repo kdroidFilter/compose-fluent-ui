@@ -6,6 +6,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -102,6 +103,7 @@ fun Card(
  * @property contentColor The color of the content (text, icons, etc.) inside the card.
  * @property borderBrush The brush used to draw the border around the card.
  */
+@Immutable
 data class CardColor(
     val fillColor: Color,
     val contentColor: Color,

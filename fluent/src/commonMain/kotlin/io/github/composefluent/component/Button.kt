@@ -109,7 +109,7 @@ fun Button(
     buttonColors: VisualStateScheme<ButtonColor> = ButtonDefaults.buttonColors(),
     interaction: MutableInteractionSource = remember { MutableInteractionSource() },
     iconOnly: Boolean = false,
-    contentArrangement: Arrangement.Horizontal = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+    contentArrangement: Arrangement.Horizontal = ButtonDefaults.DefaultContentArrangement,
     content: @Composable RowScope.() -> Unit
 ) {
     Button(
@@ -155,7 +155,7 @@ fun AccentButton(
     buttonColors: VisualStateScheme<ButtonColor> = ButtonDefaults.accentButtonColors(),
     interaction: MutableInteractionSource = remember { MutableInteractionSource() },
     iconOnly: Boolean = false,
-    contentArrangement: Arrangement.Horizontal = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+    contentArrangement: Arrangement.Horizontal = ButtonDefaults.DefaultContentArrangement,
     content: @Composable RowScope.() -> Unit
 ) {
     Button(
@@ -196,7 +196,7 @@ fun SubtleButton(
     buttonColors: VisualStateScheme<ButtonColor> = ButtonDefaults.subtleButtonColors(),
     interaction: MutableInteractionSource = remember { MutableInteractionSource() },
     iconOnly: Boolean = false,
-    contentArrangement: Arrangement.Horizontal = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+    contentArrangement: Arrangement.Horizontal = ButtonDefaults.DefaultContentArrangement,
     content: @Composable RowScope.() -> Unit
 ) {
     Button(
@@ -285,7 +285,7 @@ fun HyperlinkButton(
     buttonColors: VisualStateScheme<ButtonColor> = ButtonDefaults.hyperlinkButtonColors(),
     interaction: MutableInteractionSource = remember { MutableInteractionSource() },
     iconOnly: Boolean = false,
-    contentArrangement: Arrangement.Horizontal = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+    contentArrangement: Arrangement.Horizontal = ButtonDefaults.DefaultContentArrangement,
     content: @Composable RowScope.() -> Unit
 ) {
     Button(
@@ -369,7 +369,7 @@ fun RepeatButton(
         onClick = null,
         iconOnly = iconOnly,
         content = content,
-        contentArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
+        contentArrangement = ButtonDefaults.DefaultContentArrangement
     )
 }
 
@@ -404,7 +404,7 @@ fun DropDownButton(
     buttonColors: VisualStateScheme<ButtonColor> = ButtonDefaults.buttonColors(),
     interaction: MutableInteractionSource = remember { MutableInteractionSource() },
     iconOnly: Boolean = false,
-    contentArrangement: Arrangement.Horizontal = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+    contentArrangement: Arrangement.Horizontal = ButtonDefaults.DefaultContentArrangement,
     content: @Composable RowScope.() -> Unit
 ) {
     Button(
@@ -474,7 +474,7 @@ fun ToggleButton(
         onClick = null,
         iconOnly = iconOnly,
         content = content,
-        contentArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
+        contentArrangement = ButtonDefaults.DefaultContentArrangement
     )
 }
 
@@ -686,7 +686,7 @@ fun PillButton(
         onClick = null,
         iconOnly = false,
         content = content,
-        contentArrangement = Arrangement.spacedBy(ButtonDefaults.iconSpacing, Alignment.CenterHorizontally),
+        contentArrangement = ButtonDefaults.DefaultContentArrangement,
         shape = CircleShape
     )
 }
@@ -788,6 +788,12 @@ object ButtonDefaults {
      * The default spacing between the icon and the text content within a button.
      */
     val iconSpacing = 8.dp
+
+    /**
+     * Default horizontal arrangement for button content (stable default parameter).
+     */
+    val DefaultContentArrangement: Arrangement.Horizontal =
+        Arrangement.spacedBy(iconSpacing, Alignment.CenterHorizontally)
 
     /**
      * Creates a [ButtonColorScheme] with the default colors for a standard button.

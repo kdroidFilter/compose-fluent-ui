@@ -33,6 +33,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
@@ -105,11 +106,13 @@ fun FluentDialog(
         properties = properties,
         popupPositionProvider = DialogPopupPositionProvider
     ) {
-        val scrim by animateColorAsState(
-            if (visible) Color.Black.copy(0.3f) else Color.Transparent, animationSpec = tween(
+        val scrim = animateColorAsState(
+            targetValue = if (visible) Color.Black.copy(0.3f) else Color.Transparent,
+            animationSpec = tween(
                 easing = FluentEasing.FastInvokeEasing,
                 durationMillis = FluentDuration.ShortDuration
-            )
+            ),
+            label = "dialog-scrim"
         )
         val tween = tween<Float>(
             easing = FluentEasing.FastInvokeEasing,
@@ -117,7 +120,8 @@ fun FluentDialog(
         )
         Box(
             Modifier.fillMaxSize()
-                .background(scrim)
+                // Read animated scrim in draw so the dialog content is not recomposed every frame.
+                .drawBehind { drawRect(scrim.value) }
                 .pointerInput(Unit) {},
             Alignment.Center
         ) {
@@ -267,6 +271,7 @@ val LocalContentDialog = staticCompositionLocalOf<ContentDialogHostState> { erro
  *
  * The [show] function returns a [ContentDialogButton] representing which button was pressed by the user.
  */
+@Stable
 class ContentDialogHostState {
     private val mutex = Mutex()
 

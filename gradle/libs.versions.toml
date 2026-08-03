@@ -12,6 +12,8 @@ buildKonfig = "0.17.1"
 mavenPublish = "0.33.0"
 hot-reload = "1.1.1"
 nucleus = "dev"
+# Keep in lockstep with Kotlin (see skydoves/compose-stability-analyzer Kotlin mapping).
+stability-analyzer = "0.12.0"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
@@ -47,3 +49,4 @@ android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.
 
 build-konfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildKonfig" }
 maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
+stability-analyzer = { id = "com.github.skydoves.compose.stability.analyzer", version.ref = "stability-analyzer" }

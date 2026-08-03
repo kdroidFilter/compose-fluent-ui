@@ -44,6 +44,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.dp
 import io.github.composefluent.ExperimentalFluentApi
 import io.github.composefluent.FluentTheme
@@ -130,15 +131,25 @@ fun SideNav(
     footer: @Composable (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-    val width by animateDpAsState(
+    val width = animateDpAsState(
         targetValue = if (expanded) 320.dp else 48.dp,
         animationSpec = tween(
             durationMillis = FluentDuration.ShortDuration,
             easing = FluentEasing.FastInvokeEasing
-        )
+        ),
+        label = "sidenav-width"
     )
     Column(
-        modifier = modifier.width(width)
+        // Read animated width in layout phase so expand/collapse does not recompose children every frame.
+        modifier = modifier.layout { measurable, constraints ->
+            val w = width.value.roundToPx().coerceIn(constraints.minWidth, constraints.maxWidth)
+            val placeable = measurable.measure(
+                constraints.copy(minWidth = w, maxWidth = w)
+            )
+            layout(w, placeable.height) {
+                placeable.placeRelative(0, 0)
+            }
+        }
     ) {
         Spacer(modifier = Modifier.height(4.dp))
         CompositionLocalProvider(
@@ -419,24 +430,22 @@ fun SideNavItem(
                                     }
                                 }
                                 if (items != null) {
-                                    val rotation by animateFloatAsState(
-                                        targetValue = if (expandItems) {
-                                            180f
-                                        } else {
-                                            00f
-                                        },
+                                    val rotation = animateFloatAsState(
+                                        targetValue = if (expandItems) 180f else 0f,
                                         animationSpec = tween(
                                             durationMillis = FluentDuration.ShortDuration,
                                             easing = FluentEasing.FastInvokeEasing
-                                        )
+                                        ),
+                                        label = "sidenav-chevron-rotation"
                                     )
 
-                                    val fraction by animateFloatAsState(
+                                    val fraction = animateFloatAsState(
                                         targetValue = if (expand) 1f else 0f,
                                         animationSpec = tween(
                                             durationMillis = FluentDuration.ShortDuration,
                                             easing = FluentEasing.FastInvokeEasing
-                                        )
+                                        ),
+                                        label = "sidenav-chevron-alpha"
                                     )
                                     FontIcon(
                                         type = FontIconPrimitive.ChevronDown,
@@ -446,12 +455,8 @@ fun SideNavItem(
                                             .padding(start = 2.dp, end = 14.dp)
                                             .wrapContentWidth(Alignment.CenterHorizontally)
                                             .graphicsLayer {
-                                                rotationZ = rotation
-                                                alpha = if (fraction == 1f) {
-                                                    1f
-                                                } else {
-                                                    0f
-                                                }
+                                                rotationZ = rotation.value
+                                                alpha = if (fraction.value == 1f) 1f else 0f
                                             }
                                     )
                                 }

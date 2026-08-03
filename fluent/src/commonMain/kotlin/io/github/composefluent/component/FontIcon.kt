@@ -23,9 +23,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -263,20 +265,24 @@ object FontIconDefaults {
         modifier: Modifier = Modifier,
     ) {
         val isPressed by interactionSource.collectIsPressedAsState()
+        val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
         val scaleX = animateFloatAsState(
             targetValue = if (isPressed) 0.9f else 1f,
             animationSpec = tween(
                 durationMillis = FluentDuration.ShortDuration,
                 easing = FluentEasing.FastInvokeEasing
-            )
+            ),
+            label = "back-icon-scale"
         )
         FontIcon(
             type = FontIconPrimitive.ChromeBack,
             size = size,
             contentDescription = contentDescription,
             modifier = modifier.graphicsLayer {
-                this.scaleX = scaleX.value
-                translationX = (1f - scaleX.value) * 6.dp.toPx()
+                // Mirror the back glyph in RTL; press translation anchors to logical start.
+                val direction = if (isRtl) -1f else 1f
+                this.scaleX = scaleX.value * direction
+                translationX = direction * (1f - scaleX.value) * 6.dp.toPx()
             }
         )
     }

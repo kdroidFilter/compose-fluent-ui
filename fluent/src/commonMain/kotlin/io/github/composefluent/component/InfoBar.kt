@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
@@ -140,6 +141,7 @@ fun InfoBar(
  * @param contentColor The color of the text content within the InfoBar.
  * @param iconColor The color of the icon within the InfoBar.
  */
+@Immutable
 data class InfoBarColors(
     val backgroundColor: Color,
     val contentColor: Color,

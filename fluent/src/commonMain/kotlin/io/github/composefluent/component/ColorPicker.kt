@@ -44,6 +44,7 @@ import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.IntOffset
@@ -129,6 +130,13 @@ fun ColorPicker(
             ) {}
         }
         val (hug, saturation, _) = spectrumColor.value.hsv()
+        // Gradients are absolute LTR; reverse colors in RTL so they match RTL slider thumbs.
+        val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+        val valueGradientColors = if (isRtl) {
+            listOf(Color.hsv(hug, saturation, 1f), Color.Black)
+        } else {
+            listOf(Color.Black, Color.hsv(hug, saturation, 1f))
+        }
         BasicSlider(
             modifier = Modifier.padding(top = 21.dp).width(312.dp).height(32.dp),
             value = value,
@@ -148,12 +156,7 @@ fun ColorPicker(
                         .fillMaxWidth()
                         .requiredHeight(12.dp)
                         .background(
-                            brush = Brush.horizontalGradient(
-                                listOf(
-                                    Color.Black,
-                                    Color.hsv(hug, saturation, 1f)
-                                )
-                            ),
+                            brush = Brush.horizontalGradient(valueGradientColors),
                             shape = CircleShape
                         )
                 )
@@ -166,6 +169,11 @@ fun ColorPicker(
             }
         )
         if (alphaEnabled) {
+            val alphaGradient = if (isRtl) {
+                Brush.horizontalGradient(0f to color.copy(1f), 1f to color.copy(0f))
+            } else {
+                Brush.horizontalGradient(0f to color.copy(0f), 1f to color.copy(1f))
+            }
             BasicSlider(
                 modifier = Modifier.width(312.dp),
                 value = alpha,
@@ -179,12 +187,7 @@ fun ColorPicker(
                             .fillMaxWidth()
                             .requiredHeight(12.dp)
                             .alphaBackground(CircleShape)
-                            .background(
-                                Brush.horizontalGradient(
-                                    0f to color.copy(0f),
-                                    1f to color.copy(1f)
-                                )
-                            )
+                            .background(alphaGradient)
                     )
                 },
                 track = {},
@@ -753,8 +756,9 @@ sealed class ColorSpectrum {
 
                     Box {
                         Box(
+                            // Spectrum geometry is absolute (left = 0); do not mirror in RTL.
                             modifier = Modifier
-                                .offset { offset.value }
+                                .absoluteOffset { offset.value }
                                 .onSizeChanged {
                                     dotSize.value = it
                                 }
@@ -920,8 +924,9 @@ sealed class ColorSpectrum {
 
                     Box {
                         Box(
+                            // Spectrum geometry is absolute (left = 0); do not mirror in RTL.
                             modifier = Modifier
-                                .offset { offset.value }
+                                .absoluteOffset { offset.value }
                                 .wrapContentSize()
                                 .onSizeChanged {
                                     dotSize.value = it
