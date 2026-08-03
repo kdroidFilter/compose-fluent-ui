@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,8 +28,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -132,6 +135,7 @@ fun ComboBox(
  * @property fillColor The background color of the item.
  * @property contentColor The color of the text or other content within the item.
  */
+@Immutable
 data class ItemColor(
     val fillColor: Color,
     val contentColor: Color
@@ -213,11 +217,20 @@ fun ComboBoxItem(
     ) {
         Box(contentAlignment = Alignment.CenterStart) {
             val pressed by interactionSource.collectIsPressedAsState()
-            val height by animateDpAsState(if (pressed) 12.dp else 16.dp)
-            // Indicator
+            val height = animateDpAsState(
+                targetValue = if (pressed) 12.dp else 16.dp,
+                label = "combobox-indicator-height"
+            )
+            // Indicator — height animation read in layout phase
             if (selected) Box(
-                Modifier.size(height = height, width = 3.dp)
+                Modifier
                     .align(Alignment.CenterStart)
+                    .layout { measurable, _ ->
+                        val w = 3.dp.roundToPx()
+                        val h = height.value.roundToPx()
+                        val placeable = measurable.measure(Constraints.fixed(w, h))
+                        layout(w, h) { placeable.place(0, 0) }
+                    }
                     .background(FluentTheme.colors.fillAccent.default, CircleShape)
             )
             Text(modifier = Modifier.padding(horizontal = 12.dp), text = label)

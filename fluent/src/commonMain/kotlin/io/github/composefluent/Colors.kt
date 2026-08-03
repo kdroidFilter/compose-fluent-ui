@@ -1,6 +1,7 @@
 package io.github.composefluent
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -82,6 +83,7 @@ class Colors(
  * @property textControl The brush used for borders around text controls.
  * @property textControlFocused The brush used for borders around focused text controls.
  */
+@Immutable
 data class Borders(
     val control: Brush,
     val accentControl: Brush,
@@ -104,6 +106,7 @@ data class Borders(
  * @property dark2 A second, even darker variation of the base color.
  * @property dark3 The darkest variation of the base color.
  */
+@Immutable
 data class Shades(
     val base: Color,
     val light1: Color,
@@ -129,6 +132,7 @@ data class Shades(
  *   secondary, disabled, and selected text colors for text displayed
  *   on accent backgrounds.
  */
+@Immutable
 data class TextColor(
     val text: ColorCompound,
     val accent: ColorCompound,
@@ -147,6 +151,7 @@ data class TextColor(
  * @property tertiary The tertiary color, used for subtle details or low-emphasis text.
  * @property disabled The color used for disabled or inactive elements.
  */
+@Immutable
 data class ColorCompound(
     val primary: Color,
     val secondary: Color,
@@ -166,6 +171,7 @@ data class ColorCompound(
  * @property disabled The color for disabled text on an accent background.
  * @property selectedText The color for selected text on an accent background.
  */
+@Immutable
 data class TextOnAccentColorCompound(
     val primary: Color,
     val secondary: Color,
@@ -184,6 +190,7 @@ data class TextOnAccentColorCompound(
  * @property transparent A transparent color for controls.
  * @property inputActive The color for controls that are active input fields.
  */
+@Immutable
 data class ControlColors(
     val default: Color,
     val secondary: Color,
@@ -206,6 +213,7 @@ data class ControlColors(
  * @property quaternary A quaternary color for alternate controls.
  * @property disabled A disabled state color for alternate controls.
  */
+@Immutable
 data class ControlAltColors(
     val transparent: Color,
     val secondary: Color,
@@ -221,6 +229,7 @@ data class ControlAltColors(
  *
  * @property default The default solid background color for controls.
  */
+@Immutable
 data class ControlSolidColors(
     val default: Color
 )
@@ -234,6 +243,7 @@ data class ControlSolidColors(
  * @property default The default strong color for controls.
  * @property disabled The strong color for controls in a disabled state.
  */
+@Immutable
 data class ControlStrongColors(
     val default: Color,
     val disabled: Color
@@ -251,6 +261,7 @@ data class ControlStrongColors(
  * @property disabled The color used for accent fills when the element is disabled.
  * @property selectedTextBackground The background color for selected text when using accent colors.
  */
+@Immutable
 data class FillAccentColors(
     val default: Color,
     val secondary: Color,
@@ -270,6 +281,7 @@ data class FillAccentColors(
  * @property tertiary A tertiary color for controls on images, typically an even lighter shade.
  * @property disabled The color for disabled controls on images.
  */
+@Immutable
 data class ControlOnImageColors(
     val default: Color,
     val secondary: Color,
@@ -289,6 +301,7 @@ data class ControlOnImageColors(
  * @property divider Color for divider lines.
  * @property focus Colors for focus indicators.
  */
+@Immutable
 data class Stroke(
     val control: Control,
     val controlStrong: ControlStrong,
@@ -308,6 +321,7 @@ data class Stroke(
      * @property onAccentDisabled The disabled stroke color for controls placed on an accent background.
      * @property forStrongFillWhenOnImage The stroke color for strong fill controls placed on images.
      */
+    @Immutable
     data class Control(
         val default: Color,
         val secondary: Color,
@@ -326,6 +340,7 @@ data class Stroke(
      * @property default The default color for strong controls.
      * @property disabled The color for strong controls in a disabled state.
      */
+    @Immutable
     data class ControlStrong(
         val default: Color,
         val disabled: Color
@@ -337,6 +352,7 @@ data class Stroke(
      * @property default The default surface stroke color.
      * @property flyout The surface stroke color for flyout elements.
      */
+    @Immutable
     data class Surface(
         val default: Color,
         val flyout: Color
@@ -348,6 +364,7 @@ data class Stroke(
      * @property default The default stroke color for cards.
      * @property defaultSolid The default solid stroke color for cards.
      */
+    @Immutable
     data class Card(
         val default: Color,
         val defaultSolid: Color
@@ -358,6 +375,7 @@ data class Stroke(
      *
      * @property default The default color for dividers.
      */
+    @Immutable
     data class Divider(
         val default: Color
     )
@@ -371,6 +389,7 @@ data class Stroke(
      * @property outer The color of the outer focus indicator.
      * @property inner The color of the inner focus indicator.
      */
+    @Immutable
     data class Focus(
         val outer: Color,
         val inner: Color
@@ -388,6 +407,7 @@ data class Stroke(
  * @property tertiary A tertiary subtle fill color.
  * @property disabled A subtle fill color for disabled states.
  */
+@Immutable
 data class SubtleFillColors(
     val transparent: Color,
     val secondary: Color,
@@ -401,6 +421,7 @@ data class SubtleFillColors(
  * This includes colors for cards, smoke effects, layered surfaces, solid backgrounds,
  * Mica and Acrylic materials, and accent-colored Acrylic materials.
  */
+@Immutable
 data class Background(
     val card: Card,
     val smoke: Smoke,
@@ -415,6 +436,7 @@ data class Background(
     /**
      * Used to create ‘cards’ - content blocks that live on  page and layer backgrounds.
      */
+    @Immutable
     data class Card(
         /**
          * Default card color
@@ -433,6 +455,7 @@ data class Background(
     /**
      * Used over windows and desktop to block them out as inaccessible.
      */
+    @Immutable
     data class Smoke(
         /**
          * Dims backgrounds behinds dialogs
@@ -443,6 +466,7 @@ data class Background(
     /**
      * Used on background colors of any material to create layering.
      */
+    @Immutable
     data class Layer(
         /**
          * Content layer color
@@ -457,6 +481,7 @@ data class Background(
     /**
      * Used on background colors of any material to create layering.
      */
+    @Immutable
     data class LayerOnAcrylic(
         /**
          * Content layer color on acrylic surfaces
@@ -467,6 +492,7 @@ data class Background(
     /**
      * Used for fills on Tab control.
      */
+    @Immutable
     data class LayerOnMicaBaseAlt(
         /**
          * Active Tab Rest
@@ -490,6 +516,7 @@ data class Background(
     /**
      * Solid background colors to place layers, cards, or controls on.
      */
+    @Immutable
     data class Solid(
         /**
          * Used for the bottom most layer of an experience.
@@ -524,6 +551,7 @@ data class Background(
     /**
      * Mica background colors to place layers, cards, or controls on.
      */
+    @Immutable
     data class Mica(
         /**
          * Used for the bottom most layer of an experience.
@@ -562,6 +590,7 @@ data class Background(
     /**
      * Acrylic background colors to place layers, cards, or controls on.
      */
+    @Immutable
     data class Acrylic(
         /**
          * Used for the bottom most layer of an acrylic surface only when the surface will use layers.
@@ -600,6 +629,7 @@ data class Background(
     /**
      * Acrylic background colors to place layers, cards, or controls on.
      */
+    @Immutable
     data class AccentAcrylic(
         /**
          * Used for the bottom most layer of an acrylic surface only when the surface will use layers.
@@ -642,6 +672,7 @@ data class Background(
  * @property solidNeutral The solid color used for neutral states or elements.
  * @property solidNeutralBackground The solid background color associated with the neutral state.
  */
+@Immutable
 data class SystemColors(
     val attention: Color,
     val attentionBackground: Color,

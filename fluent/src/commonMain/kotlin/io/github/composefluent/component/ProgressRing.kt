@@ -1,13 +1,16 @@
 package io.github.composefluent.component
 
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,8 +50,8 @@ fun ProgressRing(
 ) {
     ProgressRing(
         modifier = modifier,
-        start = 0f,
-        length = progress * 360f,
+        startProvider = { 0f },
+        lengthProvider = { progress * 360f },
         width = width,
         color = color,
         size = size
@@ -57,6 +60,8 @@ fun ProgressRing(
 
 /**
  * An indeterminate [ProgressRing] that animates a ring to show progress.
+ *
+ * Animation values are read only during draw, so the infinite loop does not recompose every frame.
  *
  * @param modifier The modifier to be applied to the ProgressRing.
  * @param size The size of the ProgressRing. Default is [ProgressRingSize.Medium].
@@ -70,38 +75,35 @@ fun ProgressRing(
     width: Dp = size * 3 / 32,
     color: Color = FluentTheme.colors.fillAccent.default
 ) {
-    val length by rememberInfiniteTransition().animateFloat(
+    val infinite = rememberInfiniteTransition(label = "progress-ring")
+    val length = infinite.animateFloat(
         initialValue = 0f,
         targetValue = 180f,
-        infiniteRepeatable(
+        animationSpec = infiniteRepeatable(
             animation = tween(
                 easing = LinearEasing,
                 durationMillis = (FluentDuration.VeryLongDuration * 1.5f).toInt()
-            ), repeatMode = RepeatMode.Reverse
-        )
+            ),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "length"
     )
-
-    val progress by rememberInfiniteTransition().animateFloat(
+    val progress = infinite.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
-        infiniteRepeatable(
+        animationSpec = infiniteRepeatable(
             animation = tween(
                 easing = LinearEasing,
                 durationMillis = FluentDuration.VeryLongDuration
             )
-        )
+        ),
+        label = "progress"
     )
-
-    val state by remember {
-        derivedStateOf {
-            (progress - length) to length
-        }
-    }
 
     ProgressRing(
         modifier = modifier,
-        start = state.first,
-        length = state.second,
+        startProvider = { progress.value - length.value },
+        lengthProvider = { length.value },
         width = width,
         size = size,
         color = color
@@ -111,20 +113,20 @@ fun ProgressRing(
 @Composable
 private fun ProgressRing(
     modifier: Modifier,
-    start: Float,
-    length: Float,
+    startProvider: () -> Float,
+    lengthProvider: () -> Float,
     width: Dp,
     size: Dp,
     color: Color
 ) {
+    val density = LocalDensity.current
+    val widthPx = remember(density, width) { with(density) { width.toPx() } }
     Box(modifier.size(size)) {
-        val density = LocalDensity.current
-        val widthPx by remember(density) { derivedStateOf { with(density) { width.toPx() } } }
         Canvas(Modifier.fillMaxSize()) {
             drawArc(
                 color = color,
-                startAngle = start - 90f,
-                sweepAngle = length,
+                startAngle = startProvider() - 90f,
+                sweepAngle = lengthProvider(),
                 useCenter = false,
                 size = this.size,
                 style = Stroke(widthPx, cap = StrokeCap.Round)
