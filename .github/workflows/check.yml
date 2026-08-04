@@ -1,0 +1,47 @@
+name: Check
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apple:
+    # Apple targets can only be compiled on a Mac, so nothing verifies the
+    # appleMain source set during local development on Linux or Windows. Without
+    # this job a mistake there would only surface when a release tag triggers
+    # publish-maven, i.e. at the worst possible moment. The other targets
+    # (desktop, android, js, wasmJs) compile on any host, so they are covered by
+    # ordinary local builds and are deliberately not duplicated here.
+    name: Compile Apple targets
+    runs-on: macos-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The build plugin shells out to `git describe`.
+          fetch-depth: 0
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Compile iOS targets
+        run: >
+          ./gradlew
+          :fluent:compileKotlinIosArm64
+          :fluent:compileKotlinIosSimulatorArm64
+          --no-daemon --stacktrace

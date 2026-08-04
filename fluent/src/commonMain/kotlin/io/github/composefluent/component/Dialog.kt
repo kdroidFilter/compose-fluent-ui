@@ -50,9 +50,12 @@ import io.github.composefluent.background.BackgroundSizing
 import io.github.composefluent.background.Layer
 import io.github.composefluent.background.Mica
 import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 
 internal expect val DialogPopupPositionProvider: PopupPositionProvider
@@ -313,8 +316,20 @@ class ContentDialogHostState {
                     )
                 }
             } finally {
-                // FIXME: If set null instantly, exit animation will be terminated
-//                currentData = null
+                // Clearing instantly would drop the dialog out of composition before
+                // FluentDialog's exit transition can run, cutting the animation short.
+                // Wait exactly as long as that transition lasts — the same constant drives
+                // both the fade/scale spec and this delay — then release the data so the
+                // completed continuation is not retained.
+                //
+                // NonCancellable because `finally` also runs when the caller is cancelled,
+                // and a plain delay would abort immediately in that state. Holding the mutex
+                // meanwhile is intentional: it stops a new dialog from entering while the
+                // previous one is still animating out.
+                withContext(NonCancellable) {
+                    delay(FluentDuration.ShortDuration.toLong())
+                }
+                currentData = null
             }
         }
     }

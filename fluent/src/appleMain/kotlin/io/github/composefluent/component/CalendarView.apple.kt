@@ -1,16 +1,29 @@
 package io.github.composefluent.component
 
 import platform.Foundation.NSCalendar
-import platform.Foundation.NSCalendarIdentifierGregorian
-import platform.Foundation.NSDateFormatter
 
-internal actual fun getLocalDayOfWeekNames(): List<String> {
-    return NSCalendar(NSCalendarIdentifierGregorian).weekdaySymbols.map { it.toString() }
-}
+/**
+ * Very short standalone names ("S", "M", "T"…), matching the `NARROW_STANDALONE` style the
+ * JVM and Android targets use, so a 7-column grid header lines up on every platform. The
+ * previous implementation returned `weekdaySymbols`, i.e. the full names ("Sunday"), which
+ * cannot fit a calendar cell.
+ *
+ * The array is 0-indexed starting at Sunday, which is the order the common code expects.
+ */
+internal actual fun getLocalDayOfWeekNames(): List<String> =
+    NSCalendar.currentCalendar.veryShortStandaloneWeekdaySymbols.map { it.toString() }
 
-internal actual fun getLocalMonthNames(): List<String> {
-    return NSDateFormatter().monthSymbols.map { it.toString().take(3) } //TODO
-}
+/**
+ * Abbreviated standalone month names ("Jan", "Feb"…), matching `SHORT_STANDALONE` on the JVM
+ * and Android. This replaces `NSDateFormatter().monthSymbols` truncated with `take(3)`, which
+ * cut full names at three characters — wrong for any language whose abbreviation is not simply
+ * the first three letters.
+ *
+ * "Standalone" matters for inflected languages such as Russian, where a month shown on its own
+ * takes a different form than inside a formatted date.
+ */
+internal actual fun getLocalMonthNames(): List<String> =
+    NSCalendar.currentCalendar.shortStandaloneMonthSymbols.map { it.toString() }
 
 /**
  * Reads the user's own calendar preferences. `currentCalendar` follows the region set in
