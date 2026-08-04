@@ -36,6 +36,59 @@ Feedback and contributions are welcome.
 
 > `iosX64` was dropped: Compose Multiplatform 1.11 no longer publishes artifacts for it.
 
+## Differences from the original project
+
+This fork picks up [compose-fluent/compose-fluent-ui](https://github.com/compose-fluent/compose-fluent-ui),
+which is no longer maintained, and adds the following.
+
+### Full RTL support
+
+Every component that encodes a direction — a fill, a travel path, a caret, a gesture — is now
+mirrored in `LayoutDirection.Rtl` instead of staying left-to-right:
+
+- `ProgressBar` fill and indeterminate segment travel, `Switcher` thumb travel
+- `Slider` geometry, tick placement and drag gestures
+- `RatingControl` clip shapes, `ColorPicker` absolute dot offsets and reversed slider gradients
+- `BreadcrumbBar`, `PipsPager`, `FlipView`, `ListItem`, `Scrollbar` and `FontIcon` carets and chevrons
+
+The approach is deliberate: rather than duplicating the geometry, the canvas is mirrored so the same
+LTR math produces the RTL result. The gallery has an LTR/RTL toggle in its title bar to check any
+component in both directions.
+
+### Fewer recompositions
+
+- Theme and style models (`Colors`, and the per-component style/shape holders) are annotated
+  `@Immutable` / `@Stable`, so composables reading them can skip.
+- Animation and size values are read at layout/draw time through lambda providers instead of being
+  read in composition — an indeterminate `ProgressRing` or `ProgressBar` no longer recomposes on
+  every frame, it only redraws.
+- `Scrollbar` style allocation is hoisted out of the recomposition path.
+- `IntRange`, `ClosedFloatingPointRange` and the `kotlinx.datetime` value types are declared stable
+  through a shared [`compose_stability.conf`](compose_stability.conf), which the Compose compiler
+  and the stability analyzer both read.
+- [`compose-stability-analyzer`](https://github.com/skydoves/compose-stability-analyzer) is wired in
+  so a regression in class stability fails the build rather than silently costing frames
+  (`./gradlew :fluent:stabilityDump` to record a baseline, `:fluent:stabilityCheck` to verify it).
+  Recomposition tracing is available behind `-PcomposeTrace=true`, and compiler reports behind
+  `-PcomposeReports=true`.
+
+### Nucleus window backend
+
+The desktop chrome was a hand-rolled AWT window driving Win32 through JNA. It is now
+[Nucleus](https://github.com/NucleusFramework/Nucleus)-backed via the new `decorated-window-fluent`
+module — see [Window (desktop)](#window-desktop). That removes the JNA dependency and the
+platform-specific title-bar code, and brings native window controls, the real Windows Mica/Acrylic
+backdrop, native popup layers and window accessibility on Linux and macOS as well as Windows.
+
+### Distribution
+
+- Gallery installers are built as **GraalVM native images** (`.deb`, `.dmg`, `.exe`), so there is no
+  bundled JVM and startup is immediate.
+- Releases are tag-driven: pushing `vX.Y.Z` publishes every module to Maven Central and attaches the
+  three installers to a GitHub release. No snapshot channel.
+- Dependencies and the Gradle wrapper track current versions (Kotlin 2.4.10, Compose Multiplatform
+  1.11.1, Gradle 9.5.1), and the wasm entry point was migrated off the removed `CanvasBasedWindow`.
+
 ## Quick Start
 
 ### Add Dependency
