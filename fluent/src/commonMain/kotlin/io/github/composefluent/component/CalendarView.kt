@@ -578,10 +578,20 @@ class CalendarDatePickerState(
     val candidateMonths = mutableStateOf<List<Month>>(emptyList())
     val candidateDays = mutableStateOf<List<Day>>(emptyList())
 
-    // TODO: For localization, e.g. In China the start of week is Monday
-    // FIXME: `firstDayOfWeek` should return 2(Monday), but returns 1(Sunday) in Java 17
+    // Comes from the platform's own locale data, so it follows the user's region.
+    //
+    // Known runtime caveat, measured rather than assumed: the week data bundled in the JDK
+    // was stale before 21. `zh-CN` reports Sunday on JDK 11 and 17, and Monday from JDK 21
+    // onwards (21, 22 and 25 all verified) — China starts the week on Monday, per GB/T
+    // 7408. This is a JDK data issue that Java itself fixed, not something to work around
+    // here; a desktop app on a 21+ runtime gets the right answer. Forcing
+    // `-Djava.locale.providers=CLDR` changes nothing, so it is not a legacy-provider
+    // fallback either.
+    //
+    // Still open on every JDK tested, including 25: a locale carrying no region (`fr`
+    // rather than `fr-FR`) falls back to Sunday, because the week data is keyed by region.
+    // Rare in practice, since the locale reported by the OS normally has a country.
     val localeStartDayOfWeek = getLocalFirstDayOfWeek()
-//    val localeStartDayOfWeek = 2
 
     init {
         val dateTime = initialInstant.toLocalDateTime(timeZone)
