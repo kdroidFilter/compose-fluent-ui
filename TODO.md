@@ -54,7 +54,12 @@ what is missing or unfinished, not what exists.
 
 ## Release engineering
 
-- [x] Compose stability baselines committed and enforced in CI
+- [x] Compose stability baselines committed; the gallery one is enforced in CI
+- [ ] Enforce `:fluent:stabilityCheck` in CI. Blocked on the analyzer writing a single baseline
+      for a module whose composable set differs per target (`ContextMenu.desktop.kt` exists on
+      desktop, not on Android) while the compilation it inspects is not deterministic across
+      environments — so the same commit reports those composables as removed locally and new on
+      CI. Needs either per-target baselines upstream, or pinning the check to one target.
 - [ ] Smoke-test `publish-maven` and `release-gallery` with a throwaway pre-release tag — neither
       has ever run, and their first execution should not be the real release
 - [ ] Confirm the `dev.nucleusframework` namespace is verified on Maven Central

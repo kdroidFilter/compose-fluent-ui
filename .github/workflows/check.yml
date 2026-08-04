@@ -47,10 +47,17 @@ jobs:
           --no-daemon --stacktrace
 
   stability:
-    # Compose stability regressions cost frames silently, so the baselines in
-    # fluent/stability and gallery/stability are enforced rather than advisory.
+    # Compose stability regressions cost frames silently, so the gallery baselines in
+    # gallery/stability are enforced rather than advisory.
     # `allowMissingBaseline` is false when CI=true, so a dropped baseline fails here too.
     # Runs on Linux: these tasks read the Android compilation output and need the SDK.
+    #
+    # :fluent is deliberately NOT gated here. The analyzer writes a single baseline per module,
+    # but a KMP module's composable set differs per target — ContextMenu.desktop.kt exists on
+    # desktop and not on Android — and which compilation the task inspects is not deterministic
+    # across environments. The same commit therefore reports those composables as removed in one
+    # place and new in another. :gallery is safe because the analyzer emits one baseline per
+    # Android variant. Run `./gradlew :fluent:stabilityCheck` locally; see TODO.md.
     name: Compose stability
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -72,8 +79,4 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Check composable stability
-        run: >
-          ./gradlew
-          :fluent:stabilityCheck
-          :gallery:stabilityCheck
-          --no-daemon --stacktrace
+        run: ./gradlew :gallery:stabilityCheck --no-daemon --stacktrace
