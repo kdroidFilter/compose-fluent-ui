@@ -26,12 +26,13 @@ Thank you for using our library. We look forward to receiving your feedback and 
 | Target            | Platform              |
 |:------------------|:----------------------|
 | desktop           | Linux, macOS, Windows |
-| iosX64            | iPhone, iPad          |
 | iosArm64          | iPhone, iPad          |
 | iosSimulatorArm64 | iOS Simulator         |
 | androidTarget     | Android Devices       |
 | wasmJs            | Web Browsers          |
 | js                | Web Browsers          |
+
+> `iosX64` was dropped: Compose Multiplatform 1.11 no longer publishes artifacts for it.
 
 ## Quick Start
 
@@ -89,15 +90,21 @@ See [`gallery`](gallery) module for more details.
   - [x] App Layer Accent Acrylic Default
   - [x] App Layer Accent Acrylic Base
   - [x] App Layer Thin Acrylic
-  - [ ] Window Layer Mica
-  - [ ] Window Layer Acrylic
+  - [x] Window Layer Mica *(Windows)*
+  - [x] Window Layer Acrylic *(Windows)*
 - Mica
-  - [x] Simple Mica
-  - [ ] Real Mica
+  - [x] Simple Mica — flat `mica.base` fill
+  - [x] Real Mica — native DWM backdrop on Windows (`Mica`, `Mica Alt`, `Acrylic`) through
+    Nucleus `WindowsBackdrop`; blur-based fallback elsewhere
 - Layer
   - [x] Simple Layer
-  - [ ] Real Layer
+  - [x] Real Layer — real gaussian blur of the in-app backdrop via `hazeSource`/`hazeEffect`
 - [x] Card
+
+App-level materials (`Mica`, `Material`, `MaterialContainer`) blur the content behind them on
+every skiko target. The *window*-level backdrop, which lets the desktop wallpaper show through the
+window itself, is Windows-only and comes from the decorated window; the gallery exposes it under
+Settings → Window backdrop.
 
 ### Basic Components
 
@@ -170,11 +177,29 @@ See [`gallery`](gallery) module for more details.
 ### Theme
 
 - [x] Light and Dark theme
-- [ ] Custom accent color
+- [x] Custom accent color — `lightColors(accent = …)` / `darkColors(accent = …)` derive the whole
+  shade set from any `Color`
+- [x] Follow the OS dark mode (desktop, via the Nucleus dark-mode detector)
+- [x] RTL / mirrored layouts
+
+### Window (desktop)
+
+Provided by the `decorated-window-fluent` module on top of
+[Nucleus](https://github.com/NucleusFramework/Nucleus):
+
+- [x] Client-side decorated window and dialog with a Fluent title bar
+- [x] Native window controls, drag regions and snap behaviour
+- [x] Native Mica / Mica Alt / Acrylic window backdrop *(Windows)*
+- [x] Title bar and chrome themed from the ambient `FluentTheme` colors
+- [x] Native popup layers, so menus and flyouts can extend past the window bounds
 
 ### Accessibility
 
-- [ ] Accessibility Semantics
+- [x] Semantic roles and state on interactive components (`Role.Checkbox`, `Role.Switch`,
+  `Role.RadioButton`, `toggleable`/`selectable` semantics, icon content descriptions)
+- [x] Screen-reader support for the decorated window: the Nucleus Tao backend bridges the Compose
+  semantics tree to the platform accessibility API
+- [ ] `Slider` semantics (still a TODO in the component)
 
 ## Contribution
 
@@ -208,10 +233,7 @@ This project is built upon the foundations laid by several remarkable open-sourc
 ### Gallery
 | Project | Description | License |
 |---|---|---|
-| [lhwdev/compose-window](https://github.com/lhwdev/compose-window) | Provides guidance on passing pointer events back to the parent window. | [Apache License 2.0](https://github.com/lhwdev/compose-window/blob/main/LICENSE) |
-| [grassator/win32-window-custom-titlebar](https://github.com/grassator/win32-window-custom-titlebar) | Demonstrates how to hide the Windows title bar. | [MIT License](https://github.com/grassator/win32-window-custom-titlebar/blob/master/LICENSE) |
-| [MayakaApps/ComposeWindowStyler](https://github.com/MayakaApps/ComposeWindowStyler) | Enables mica window backgrounds on Windows. | [MIT License](https://github.com/MayakaApps/ComposeWindowStyler/blob/main/LICENSE) |
-| [java-native-access/jna](https://github.com/java-native-access/jna) | Provides the capability to interact with Win32 APIs, enabling title bar customization. | [Apache License 2.0](https://github.com/java-native-access/jna/blob/master/LICENSE) |
+| [NucleusFramework/Nucleus](https://github.com/NucleusFramework/Nucleus) | Provides the decorated window and dialog, native window controls, the Windows Mica/Acrylic backdrop, window accessibility, OS dark-mode detection and the GraalVM native packaging of the gallery. | [Apache License 2.0](https://github.com/NucleusFramework/Nucleus/blob/main/LICENSE) |
 | [google/ksp](https://github.com/google/ksp) | Along with KotlinPoet, helps with source code generation for examples and navigation logic. | [Apache License 2.0](https://github.com/google/ksp/blob/main/LICENSE) |
 | [square/kotlinpoet](https://github.com/square/kotlinpoet) | Along with KSP, helps with source code generation for examples and navigation logic. | [Apache License 2.0](https://github.com/square/kotlinpoet/blob/main/LICENSE.txt) |
 | [SnipMeDev/Highlights](https://github.com/SnipMeDev/Highlights) | Enables syntax highlighting for example code. | [Apache License 2.0](https://github.com/SnipMeDev/Highlights/blob/main/LICENSE) |
