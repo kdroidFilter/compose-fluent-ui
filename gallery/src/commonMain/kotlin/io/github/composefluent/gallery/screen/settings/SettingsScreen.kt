@@ -239,7 +239,7 @@ fun SettingsScreen(componentNavigator: ComponentNavigator) {
                 )
 
                 // Hide this test component if gallery is release version.
-                if (!BuildKonfig.CURRENT_BRANCH.equals("master", false)) {
+                if (!BuildKonfig.IS_RELEASE) {
                     Header("Test")
                     CardExpanderItem(
                         heading = {

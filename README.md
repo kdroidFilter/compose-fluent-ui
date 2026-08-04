@@ -3,7 +3,6 @@
 [![License](https://img.shields.io/github/license/NucleusFramework/compose-fluent-ui)](LICENSE)
 [![Version](https://img.shields.io/github/v/release/NucleusFramework/compose-fluent-ui?include_prereleases)](https://github.com/NucleusFramework/compose-fluent-ui/releases)
 [![Maven Central](https://img.shields.io/maven-central/v/dev.nucleusframework.composefluent/fluent)](https://central.sonatype.com/artifact/dev.nucleusframework.composefluent/fluent/)
-[![Telegram Link](https://img.shields.io/badge/Telegram-compose__fluent__ui-blue?logo=telegram&logoColor=fff)](https://t.me/compose_fluent_ui)
 
 > Fork of [compose-fluent/compose-fluent-ui](https://github.com/compose-fluent/compose-fluent-ui),
 > maintained and updated on top of [Nucleus](https://github.com/NucleusFramework/Nucleus)
@@ -39,11 +38,11 @@ Thank you for using our library. We look forward to receiving your feedback and 
 ### Add Dependency
 
 ```kts
-implementation("dev.nucleusframework.composefluent:fluent:0.1.0")
-implementation("dev.nucleusframework.composefluent:fluent-icons-extended:0.1.0") // If you want to use full fluent icons.
+implementation("dev.nucleusframework.composefluent:fluent:1.0.0")
+implementation("dev.nucleusframework.composefluent:fluent-icons-extended:1.0.0") // If you want to use full fluent icons.
 
 // Desktop only: client-side decorated window and dialog backed by Nucleus/Tao.
-implementation("dev.nucleusframework.composefluent:decorated-window-fluent:0.1.0")
+implementation("dev.nucleusframework.composefluent:decorated-window-fluent:1.0.0")
 ```
 
 Every release is published to Maven Central from a `vX.Y.Z` tag; check the

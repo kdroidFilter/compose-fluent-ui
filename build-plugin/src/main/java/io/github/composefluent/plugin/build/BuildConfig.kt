@@ -10,14 +10,15 @@ object BuildConfig {
 
     const val repositoryUrl = "https://github.com/NucleusFramework/compose-fluent-ui"
 
-    internal const val snapshotLibraryVersion = "0.1.0-SNAPSHOT"
+    /** Version used when the build is not driven by a release tag. */
+    internal const val defaultLibraryVersion = "1.0.0"
 
     val isRelease = System.getenv("PROJECT_BUILD_TYPE") == "release"
 
     /**
      * Release version exported by the CI from the pushed tag (`RELEASE_VERSION=v1.2.3`).
-     * Blank or non-numeric values (e.g. a branch name) are ignored so that manual
-     * `workflow_dispatch` runs on a branch fall back to the snapshot version.
+     * Blank or non-numeric values (e.g. a branch name) are ignored so that a manual
+     * `workflow_dispatch` run on a branch falls back to [defaultLibraryVersion].
      */
     val releaseVersion: String? =
         System
@@ -25,13 +26,21 @@ object BuildConfig {
             ?.removePrefix("v")
             ?.takeIf { it.isNotBlank() && it.first().isDigit() }
 
-    var libraryVersion: String = snapshotLibraryVersion
+    var libraryVersion: String = defaultLibraryVersion
         internal set
 
     var integerVersionName: String = ""
         internal set
 
-    var branch: String = "dev"
+    /**
+     * Git ref the gallery deep-links its source code to. A release build pins it to the
+     * published tag so the links keep working forever; otherwise it is the current branch.
+     */
+    var branch: String = "master"
+        internal set
+
+    /** True when building from a release tag (or with `PROJECT_BUILD_TYPE=release`). */
+    var isReleaseBuild: Boolean = false
         internal set
 
     object Android {

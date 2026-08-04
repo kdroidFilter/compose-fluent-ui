@@ -174,8 +174,7 @@ nucleus.application {
     nativeDistributions {
         packageName = "compose-fluent-gallery"
         // Native installers only accept numeric versions: `integerVersionName` is
-        // the X.Y.Z form of the tag (or of the snapshot version) already used for
-        // the Android `versionName`.
+        // the plain X.Y.Z form of the version, without any pre-release suffix.
         packageVersion = BuildConfig.integerVersionName
         targetFormats(TargetFormat.Dmg, TargetFormat.Nsis, TargetFormat.Deb)
         compressionLevel = CompressionLevel.Ultra
@@ -203,7 +202,11 @@ buildkonfig {
         buildConfigField(FieldSpec.Type.STRING, "KOTLIN_VERSION", libs.versions.kotlin.get(), const = true)
         buildConfigField(FieldSpec.Type.STRING, "HAZE_VERSION", libs.versions.haze.get(), const = true)
 
-        buildConfigField(FieldSpec.Type.STRING, "CURRENT_BRANCH", BuildConfig.branch, const = true)
+        buildConfigField(FieldSpec.Type.STRING, "PROJECT_URL", BuildConfig.repositoryUrl, const = true)
+        // Git ref the source deep links resolve against: the tag on a release
+        // build, the checked-out branch otherwise.
+        buildConfigField(FieldSpec.Type.STRING, "SOURCE_REF", BuildConfig.branch, const = true)
+        buildConfigField(FieldSpec.Type.BOOLEAN, "IS_RELEASE", BuildConfig.isReleaseBuild.toString(), const = true)
     }
 }
 

@@ -4,7 +4,7 @@ import io.github.composefluent.build.BuildKonfig
 
 object ProjectUrl {
 
-    const val ROOT = "https://github.com/compose-fluent/compose-fluent-ui"
+    const val ROOT = BuildKonfig.PROJECT_URL
 
     const val FRAMEWORK = "https://developer.android.com/develop/ui/compose"
 
@@ -12,14 +12,18 @@ object ProjectUrl {
 
     const val FEED_BACK = "$ROOT/issues/new/choose"
 
-    private const val BRANCH = BuildKonfig.CURRENT_BRANCH
+    /**
+     * Git ref the source links resolve against: the published tag on a release build,
+     * so the links keep working forever; the checked-out branch otherwise.
+     */
+    private const val REF = BuildKonfig.SOURCE_REF
 
     fun componentCodeOf(path: String): String {
-        return "$ROOT/tree/$BRANCH/$path"
+        return "$ROOT/tree/$REF/$path"
     }
 
     fun galleryCodeOf(path: String): String {
-        return "$ROOT/tree/$BRANCH/gallery/src/$path"
+        return "$ROOT/tree/$REF/gallery/src/$path"
     }
 
     //TODO documentation redirection

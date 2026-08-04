@@ -2,10 +2,11 @@ package io.github.composefluent.plugin.build
 
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import io.github.composefluent.plugin.build.BuildConfig.branch
+import io.github.composefluent.plugin.build.BuildConfig.defaultLibraryVersion
 import io.github.composefluent.plugin.build.BuildConfig.integerVersionName
 import io.github.composefluent.plugin.build.BuildConfig.isRelease
+import io.github.composefluent.plugin.build.BuildConfig.isReleaseBuild
 import io.github.composefluent.plugin.build.BuildConfig.libraryVersion
-import io.github.composefluent.plugin.build.BuildConfig.snapshotLibraryVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
@@ -154,59 +155,39 @@ class BuildPlugin : Plugin<Project> {
     private fun setupLibraryVersion(target: Project) {
         val providers = target.providers
 
-        providers.exec {
+        val currentBranch = providers.exec {
             commandLine("git", "branch", "--show-current")
             isIgnoreExitValue = true
         }.standardOutput
             .asText
             .orNull
             ?.trim()
-            ?.let { branch = it }
+            ?.takeIf { it.isNotEmpty() }
 
-        val gitTag = providers.exec {
+        // Latest reachable tag, used when a Pages/preview build asks for the
+        // released version without going through a tag push.
+        val latestTag = providers.exec {
             commandLine("git", "describe", "--abbrev=0", "--tags")
             isIgnoreExitValue = true
-        }.standardOutput.asText.get().trim()
+        }.standardOutput.asText.orNull
+            ?.trim()
+            ?.removePrefix("v")
+            ?.takeIf { it.isNotBlank() && it.first().isDigit() }
 
-        val relativeCommitCount = providers.exec {
-            commandLine("git", "describe", "--tags")
-            isIgnoreExitValue = true
-        }.standardOutput.asText.get().trim()
-            .removePrefix(gitTag)
-            .let {
-                if (it.isNotEmpty()) {
-                    it.split("-")[1].toInt()
-                } else {
-                    0
-                }
-            }
+        // Tag-driven: the CI exports RELEASE_VERSION=<tag>. Everything else — local
+        // builds, PR checks — simply builds the current version.
+        val resolvedRelease = BuildConfig.releaseVersion ?: latestTag?.takeIf { isRelease }
+        libraryVersion = resolvedRelease ?: defaultLibraryVersion
+        isReleaseBuild = resolvedRelease != null
 
-        libraryVersion = when {
-            // Tag-driven: the CI exports RELEASE_VERSION=<tag>.
-            BuildConfig.releaseVersion != null -> BuildConfig.releaseVersion!!
-            isRelease -> gitTag.removePrefix("v")
-            else -> snapshotLibraryVersion
-        }
+        // A release pins the gallery's source deep links to the tag so they keep
+        // resolving forever; a dev build follows whatever branch is checked out.
+        branch = resolvedRelease?.let { "v$it" } ?: currentBranch ?: "master"
 
-        integerVersionName = libraryVersion
-            .removePrefix("v")
-            .removeSuffix("-SNAPSHOT")
-            .substringBefore("-dev")
-            .let {
-                val parts = it.split(".")
-                var major = parts.getOrNull(0) ?: "0"
-                var minor = parts.getOrNull(1) ?: "0"
-                if (major.startsWith("0")) {
-                    major = "1"
-                    minor = "0"
-                }
-                when (parts.size) {
-                    1, 2 -> "${major}.$minor.$relativeCommitCount"
-                    else -> {
-                        val patchVersion = parts[2].toIntOrNull() ?: 0
-                        "${major}.${minor}.${patchVersion * 200 + relativeCommitCount}"
-                    }
-                }
-            }
+        // Native installers and app stores only accept a plain X.Y.Z.
+        integerVersionName = libraryVersion.substringBefore("-")
+            .split(".")
+            .let { parts -> (0..2).map { parts.getOrNull(it)?.toIntOrNull() ?: 0 } }
+            .joinToString(".")
     }
 }
