@@ -361,6 +361,13 @@ public fun io.github.composefluent.component.BadgeDefaults.color(status: io.gith
     - status: STABLE (class with no mutable properties)
 
 @Composable
+public fun io.github.composefluent.component.BadgeDefaults.contentColor(status: io.github.composefluent.component.BadgeStatus): androidx.compose.ui.graphics.Color
+  skippable: false
+  restartable: false
+  params:
+    - status: STABLE (class with no mutable properties)
+
+@Composable
 private fun io.github.composefluent.component.BasicBreadcrumbBarItem(onClick: kotlin.Function0<kotlin.Unit>, colorScheme: io.github.composefluent.scheme.VisualStateScheme<androidx.compose.ui.graphics.Color>, chevronColors: io.github.composefluent.scheme.VisualStateScheme<androidx.compose.ui.graphics.Color>, textStyle: androidx.compose.ui.text.TextStyle, chevronSize: io.github.composefluent.component.FontIconSize, modifier: androidx.compose.ui.Modifier, chevronVisible: kotlin.Boolean, enabled: kotlin.Boolean, interaction: androidx.compose.foundation.interaction.MutableInteractionSource?, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
   skippable: false
   restartable: true
@@ -3683,13 +3690,6 @@ private fun io.github.composefluent.component.unselectedItemColors(): io.github.
   skippable: false
   restartable: false
   params:
-
-@Composable
-public fun io.github.composefluent.contentColorFor(backgroundColor: androidx.compose.ui.graphics.Color): androidx.compose.ui.graphics.Color
-  skippable: false
-  restartable: false
-  params:
-    - backgroundColor: STABLE (marked @Stable or @Immutable)
 
 @Composable
 internal fun io.github.composefluent.layout.FixedWidthLayout(header: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier, verticalArrangement: androidx.compose.foundation.layout.Arrangement.Vertical, intrinsicSize: androidx.compose.foundation.layout.IntrinsicSize, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit

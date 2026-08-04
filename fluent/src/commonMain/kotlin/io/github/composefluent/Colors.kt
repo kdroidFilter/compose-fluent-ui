@@ -1,15 +1,12 @@
 package io.github.composefluent
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.takeOrElse
 
 /**
  * Represents the color palette for the Fluent UI design system.
@@ -716,46 +713,6 @@ internal fun getAccentShades() = mapOf<Color, Shades>(
     ),
 )
 
-
-/**
- * Returns the content color for a given background color.
- *
- * This function determines an appropriate color for text or other content to be
- * displayed on top of the provided `backgroundColor` to ensure sufficient contrast
- * and readability according to the Fluent design system.
- *
- * If no specific content color is defined for the given background color within the
- * current [FluentTheme.colors], it falls back to the [LocalContentColor.current].
- *
- * @param backgroundColor The background color for which to determine the content color.
- * @return The content color that provides sufficient contrast with the background.
- */
-@Composable
-@ReadOnlyComposable
-fun contentColorFor(backgroundColor: Color) =
-    FluentTheme.colors.contentColorFor(backgroundColor).takeOrElse { LocalContentColor.current }
-
-/**
- * Returns the default content color for the given background color.
- *
- * This function provides a suggested content color (like text color) that ensures sufficient
- * contrast and legibility when placed on the provided [backgroundColor]. The determination
- * is based on the Fluent UI color palette and aims to follow accessibility guidelines.
- *
- * @param backgroundColor The background color for which to determine the content color.
- * @return The suggested content color for the given [backgroundColor].
- */
-fun Colors.contentColorFor(backgroundColor: Color): Color {
-    // TODO: Remove this
-    return when (backgroundColor) {
-        shades.base, shades.dark1, shades.dark2, shades.dark3,
-        shades.light1, shades.light2, shades.light3,
-        system.caution, system.attention, system.success,
-        system.critical, system.solidNeutral -> text.onAccent.primary
-
-        else -> text.text.primary
-    }
-}
 
 internal fun generateTextColors(shades: Shades, darkMode: Boolean): TextColor =
     if (darkMode) TextColor(

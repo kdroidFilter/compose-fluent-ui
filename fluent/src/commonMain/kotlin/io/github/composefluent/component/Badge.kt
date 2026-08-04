@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.layout.layout
@@ -20,7 +21,6 @@ import io.github.composefluent.FluentTheme
 import io.github.composefluent.LocalContentAlpha
 import io.github.composefluent.LocalContentColor
 import io.github.composefluent.LocalTextStyle
-import io.github.composefluent.contentColorFor
 import io.github.composefluent.icons.Icons
 import io.github.composefluent.icons.filled.Checkmark
 import io.github.composefluent.icons.filled.Dismiss
@@ -40,7 +40,7 @@ import io.github.composefluent.icons.filled.Dismiss
 fun Badge(
     status: BadgeStatus,
     backgroundColor: Color = BadgeDefaults.color(status),
-    contentColor: Color = contentColorFor(backgroundColor),
+    contentColor: Color = BadgeDefaults.contentColor(status),
     modifier: Modifier = Modifier,
     content: (@Composable (status: BadgeStatus) -> Unit)? = null
 ) {
@@ -66,7 +66,15 @@ fun Badge(
 fun Badge(
     backgroundColor: Color,
     modifier: Modifier = Modifier,
-    contentColor: Color = contentColorFor(backgroundColor),
+    // This overload takes an arbitrary background, so the contrast is computed rather than looked
+    // up: a light background gets primary text, a dark one gets the on-accent color. The previous
+    // default matched the background by equality against the palette and fell back to primary
+    // text for anything else, which was unreadable on a dark custom color.
+    contentColor: Color = if (backgroundColor.luminance() > 0.5f) {
+        FluentTheme.colors.text.text.primary
+    } else {
+        FluentTheme.colors.text.onAccent.primary
+    },
     content: (@Composable () -> Unit)? = null
 ) {
     val defaultSize = if (content != null) {
@@ -162,6 +170,24 @@ object BadgeDefaults {
             BadgeStatus.Caution -> FluentTheme.colors.system.caution
             BadgeStatus.Critical -> FluentTheme.colors.system.critical
             BadgeStatus.Success -> FluentTheme.colors.system.success
+        }
+    }
+
+    /**
+     * Content color to draw on top of [color] for the same [status].
+     *
+     * Only [BadgeStatus.Informational] uses a plain background ([SystemColors.neutralBackground]);
+     * every other status paints a solid accent, so its content is drawn with the on-accent color.
+     *
+     * @param status The [BadgeStatus] to determine the content color for.
+     * @return The [Color] to use for content on a badge of the given status.
+     */
+    @Stable
+    @Composable
+    fun contentColor(status: BadgeStatus): Color {
+        return when (status) {
+            BadgeStatus.Informational -> FluentTheme.colors.text.text.primary
+            else -> FluentTheme.colors.text.onAccent.primary
         }
     }
 
