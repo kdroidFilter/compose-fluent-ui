@@ -1,31 +1,31 @@
 [versions]
-activityCompose = "1.10.1"
-haze = "1.6.6"
-kotlin = "2.4.0"
+activityCompose = "1.13.0"
+haze = "1.7.2"
+kotlin = "2.4.10"
 ksp = "2.3.10"
 compose = "1.11.1"
 androidGradlePlugin = "8.13.2"
-androidBuildTools = "31.7.2"
-highlights = "1.0.0"
-kotlinx-datetime = "0.7.1"
-buildKonfig = "0.17.1"
-mavenPublish = "0.33.0"
+androidBuildTools = "32.3.1"
+highlights = "1.1.0"
+kotlinx-datetime = "0.8.0"
+buildKonfig = "0.22.0"
+mavenPublish = "0.37.0"
 hot-reload = "1.1.1"
-nucleus = "dev"
+nucleus = "2.2.0"
 # Keep in lockstep with Kotlin (see skydoves/compose-stability-analyzer Kotlin mapping).
 stability-analyzer = "0.12.0"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
-androidx-test-junit = "androidx.test.ext:junit:1.2.1"
+androidx-test-junit = "androidx.test.ext:junit:1.3.0"
 
 haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
 
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
-ktor-client-java = "io.ktor:ktor-client-java:3.0.0"
-jsoup = "org.jsoup:jsoup:1.16.2"
-google-guava = "com.google.guava:guava:33.2.1-jre"
-squareup-kotlinpoet = "com.squareup:kotlinpoet:2.1.0"
+ktor-client-java = "io.ktor:ktor-client-java:3.5.2"
+jsoup = "org.jsoup:jsoup:1.23.1"
+google-guava = "com.google.guava:guava:33.6.0-jre"
+squareup-kotlinpoet = "com.squareup:kotlinpoet:2.3.0"
 android-tools-common = { module = "com.android.tools:common", version.ref = "androidBuildTools" }
 android-tools-sdk-common = { module = "com.android.tools:sdk-common", version.ref = "androidBuildTools" }
 highlights = { module = "dev.snipme:highlights", version.ref = "highlights" }
