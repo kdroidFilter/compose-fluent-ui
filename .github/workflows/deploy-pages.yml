@@ -1,0 +1,60 @@
+name: Deploy gallery to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # Makes the build plugin resolve the library version from the latest tag,
+      # so the gallery's About screen shows a release version.
+      PROJECT_BUILD_TYPE: release
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The build plugin runs `git describe --tags`; a shallow clone has no tags.
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Build Wasm distribution
+        run: ./gradlew :gallery:wasmJsBrowserDistribution --no-daemon
+
+      - name: Fix relative paths for Pages
+        run: |
+          dist=gallery/build/dist/wasmJs/productionExecutable
+          # GitHub Pages serves from /<repo>/, ensure index uses relative URLs
+          if [ -f "$dist/index.html" ]; then
+            sed -i 's|="/|="./|g' "$dist/index.html"
+          fi
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: gallery/build/dist/wasmJs/productionExecutable
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

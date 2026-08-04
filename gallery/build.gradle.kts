@@ -1,6 +1,7 @@
 import com.android.build.api.variant.impl.VariantOutputImpl
 import com.codingfeline.buildkonfig.compiler.FieldSpec
 import dev.nucleusframework.desktop.application.dsl.CompressionLevel
+import dev.nucleusframework.desktop.application.dsl.NativeImageOptimization
 import dev.nucleusframework.desktop.application.dsl.TargetFormat
 import io.github.composefluent.plugin.build.BuildConfig
 import io.github.composefluent.plugin.build.applyTargets
@@ -15,7 +16,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.build.konfig)
     alias(libs.plugins.stability.analyzer)
-    id("dev.nucleusframework") version "dev"
+    alias(libs.plugins.nucleus)
 }
 
 composeCompiler {
@@ -172,14 +173,23 @@ nucleus.application {
     mainClass = "${BuildConfig.packageName}.gallery.MainKt"
     nativeDistributions {
         packageName = "compose-fluent-gallery"
-        packageVersion = "1.0.0"
+        // Native installers only accept numeric versions: `integerVersionName` is
+        // the X.Y.Z form of the tag (or of the snapshot version) already used for
+        // the Android `versionName`.
+        packageVersion = BuildConfig.integerVersionName
         targetFormats(TargetFormat.Dmg, TargetFormat.Nsis, TargetFormat.Deb)
         compressionLevel = CompressionLevel.Ultra
+        cleanupNativeLibs = true
+        linux {
+            debMaintainer = "Nucleus"
+            homepage = BuildConfig.repositoryUrl
+        }
     }
     graalvm {
         isEnabled = true
         javaLanguageVersion = 25
         imageName = "compose-fluent-gallery"
+        optimization = NativeImageOptimization.SIZE
     }
 }
 

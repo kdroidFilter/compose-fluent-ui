@@ -1,11 +1,13 @@
 <h1><img src="assets/icon.png" alt="Compose Fluent logo" height="48" valign="middle"> Compose Fluent</h1>
 
-[![License](https://img.shields.io/github/license/compose-fluent/compose-fluent-ui)](LICENSE)
-[![Version](https://img.shields.io/github/v/release/compose-fluent/compose-fluent-ui?include_prereleases)](https://github.com/compose-fluent/compose-fluent-ui/releases)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.compose-fluent/fluent)](https://central.sonatype.com/artifact/io.github.compose-fluent/fluent/)
+[![License](https://img.shields.io/github/license/kdroidFilter/compose-fluent-ui)](LICENSE)
+[![Version](https://img.shields.io/github/v/release/kdroidFilter/compose-fluent-ui?include_prereleases)](https://github.com/kdroidFilter/compose-fluent-ui/releases)
+[![Maven Central](https://img.shields.io/maven-central/v/dev.nucleusframework.composefluent/fluent)](https://central.sonatype.com/artifact/dev.nucleusframework.composefluent/fluent/)
 [![Telegram Link](https://img.shields.io/badge/Telegram-compose__fluent__ui-blue?logo=telegram&logoColor=fff)](https://t.me/compose_fluent_ui)
 
-[//]: # ([![Snapshot]&#40;https://img.shields.io/nexus/s/io.github.compose-fluent/fluent?server=https%3A%2F%2Fcentral.sonatype.com&label=snapshot&#41;]&#40;https://central.sonatype.com/service/rest/repository/browse/maven-snapshots/io/github/compose-fluent&#41;)
+> Fork of [compose-fluent/compose-fluent-ui](https://github.com/compose-fluent/compose-fluent-ui),
+> maintained and updated on top of [Nucleus](https://github.com/NucleusFramework/Nucleus)
+> (client-side decorated window, GraalVM native gallery builds).
 
 **Fluent Design** UI library for **Compose Multiplatform**
 
@@ -36,29 +38,21 @@ Thank you for using our library. We look forward to receiving your feedback and 
 ### Add Dependency
 
 ```kts
-implementation("io.github.compose-fluent:fluent:v0.1.0")
-implementation("io.github.compose-fluent:fluent-icons-extended:v0.1.0") // If you want to use full fluent icons.
+implementation("dev.nucleusframework.composefluent:fluent:0.1.0")
+implementation("dev.nucleusframework.composefluent:fluent-icons-extended:0.1.0") // If you want to use full fluent icons.
+
+// Desktop only: client-side decorated window and dialog backed by Nucleus/Tao.
+implementation("dev.nucleusframework.composefluent:decorated-window-fluent:0.1.0")
 ```
 
-#### Snapshot Versions
+Every release is published to Maven Central from a `vX.Y.Z` tag; check the
+[latest version](https://central.sonatype.com/artifact/dev.nucleusframework.composefluent/fluent/).
 
-Snapshot versions are automatically published from the `dev` branch. To access snapshot artifacts, add the Sonatype snapshot repository to your `build.gradle.kts`:
+### Gallery
 
-```kotlin
-repositories {
-    mavenCentral()
-    // Add Sonatype snapshots repository
-    maven("https://central.sonatype.com/repository/maven-snapshots/")
-}
-```
-
-Then specify the snapshot dependency with the `-SNAPSHOT` suffix:
-
-```kotlin
-implementation("io.github.compose-fluent:fluent:0.1.0-SNAPSHOT")
-```
-
-You can check our latest snapshots at [Maven Central](https://central.sonatype.com/artifact/io.github.compose-fluent/fluent/).
+Prebuilt native gallery installers (Linux `.deb`, macOS `.dmg`, Windows `.exe`) are attached to
+each [GitHub release](https://github.com/kdroidFilter/compose-fluent-ui/releases), and the web
+version is deployed to [GitHub Pages](https://kdroidfilter.github.io/compose-fluent-ui/).
 
 ### Example
 

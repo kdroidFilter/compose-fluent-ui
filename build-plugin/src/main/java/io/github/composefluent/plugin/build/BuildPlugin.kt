@@ -45,14 +45,13 @@ class BuildPlugin : Plugin<Project> {
 
     private fun MavenPublishBaseExtension.setupMavenPortalPublishing(target: Project) {
         publishToMavenCentral()
-        signAllPublications()
         coordinates(target.group.toString(), target.name, target.version.toString())
 
         pom {
             name.set("Compose Fluent UI")
             description.set("A Fluent Design UI library for Compose Multiplatform.")
             inceptionYear.set("2025")
-            url.set("https://github.com/compose-fluent/compose-fluent-ui")
+            url.set(BuildConfig.repositoryUrl)
             licenses {
                 license {
                     name.set("The Apache License, Version 2.0")
@@ -71,12 +70,23 @@ class BuildPlugin : Plugin<Project> {
                     name.set("Sanlorng")
                     url.set("https://github.com/sanlorng")
                 }
+                developer {
+                    id.set("kdroidFilter")
+                    name.set("Elie G.")
+                    url.set("https://github.com/kdroidFilter")
+                }
             }
             scm {
-                url.set("https://github.com/compose-fluent/compose-fluent-ui")
-                connection.set("scm:git:git://github.com/compose-fluent/compose-fluent-ui.git")
-                developerConnection.set("scm:git:ssh://github.com/compose-fluent/compose-fluent-ui.git")
+                url.set(BuildConfig.repositoryUrl)
+                connection.set("scm:git:git://github.com/kdroidFilter/compose-fluent-ui.git")
+                developerConnection.set("scm:git:ssh://github.com/kdroidFilter/compose-fluent-ui.git")
             }
+        }
+
+        // The CI signs with an in-memory key (ORG_GRADLE_PROJECT_signingInMemoryKey);
+        // local publishes stay unsigned unless a GPG keyring is configured.
+        if (target.hasProperty("signingInMemoryKey") || target.hasProperty("signing.keyId")) {
+            signAllPublications()
         }
     }
 
@@ -172,7 +182,9 @@ class BuildPlugin : Plugin<Project> {
             }
 
         libraryVersion = when {
-            isRelease -> gitTag
+            // Tag-driven: the CI exports RELEASE_VERSION=<tag>.
+            BuildConfig.releaseVersion != null -> BuildConfig.releaseVersion!!
+            isRelease -> gitTag.removePrefix("v")
             else -> snapshotLibraryVersion
         }
 
