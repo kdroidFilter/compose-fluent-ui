@@ -370,24 +370,6 @@ internal class MenuFlyoutScopeImpl : MenuFlyoutScope {
     }
 }
 
-@Deprecated(
-    message = "use ListItemColorScheme instead",
-    replaceWith = ReplaceWith(
-        expression = "ListItemColorScheme",
-        imports = arrayOf("io.github.composefluent.component.ListItemColorScheme")
-    )
-)
-typealias MenuColors = ListItemColorScheme
-
-@Deprecated(
-    message = "use ListItemColor instead",
-    replaceWith = ReplaceWith(
-        "ListItemColor",
-        imports = arrayOf("io.github.composefluent.component.ListItemColor")
-    )
-)
-typealias MenuColor = ListItemColor
-
 /**
  * Scope for the content of a [MenuFlyout].
  *

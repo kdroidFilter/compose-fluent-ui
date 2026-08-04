@@ -86,20 +86,6 @@ public fun io.github.composefluent.ProvideTextStyle(value: androidx.compose.ui.t
     - content: STABLE (composable function type)
 
 @Composable
-public fun io.github.composefluent.background.Layer(modifier: androidx.compose.ui.Modifier, shape: androidx.compose.ui.graphics.Shape, color: androidx.compose.ui.graphics.Color, contentColor: androidx.compose.ui.graphics.Color, border: androidx.compose.foundation.BorderStroke?, outsideBorder: kotlin.Boolean, elevation: androidx.compose.ui.unit.Dp, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - modifier: STABLE (marked @Stable or @Immutable)
-    - shape: STABLE (marked @Stable or @Immutable)
-    - color: STABLE (marked @Stable or @Immutable)
-    - contentColor: STABLE (marked @Stable or @Immutable)
-    - border: STABLE (marked @Stable or @Immutable)
-    - outsideBorder: STABLE (primitive type)
-    - elevation: STABLE (marked @Stable or @Immutable)
-    - content: STABLE (composable function type)
-
-@Composable
 public fun io.github.composefluent.background.Layer(modifier: androidx.compose.ui.Modifier, shape: androidx.compose.ui.graphics.Shape, color: androidx.compose.ui.graphics.Color, contentColor: androidx.compose.ui.graphics.Color, border: androidx.compose.foundation.BorderStroke?, backgroundSizing: io.github.composefluent.background.BackgroundSizing, elevation: androidx.compose.ui.unit.Dp, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
@@ -3257,19 +3243,6 @@ public fun io.github.composefluent.component.TextFieldDefaults.Container(modifie
     - content: STABLE (composable function type)
 
 @Composable
-public fun io.github.composefluent.component.TextFieldDefaults.DecorationBox(value: kotlin.String, interactionSource: androidx.compose.foundation.interaction.MutableInteractionSource, enabled: kotlin.Boolean, color: io.github.composefluent.component.TextFieldColor, modifier: androidx.compose.ui.Modifier, placeholder: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>?, innerTextField: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - value: STABLE (String is immutable)
-    - interactionSource: STABLE (marked @Stable or @Immutable)
-    - enabled: STABLE (primitive type)
-    - color: STABLE (marked @Stable or @Immutable)
-    - modifier: STABLE (marked @Stable or @Immutable)
-    - placeholder: STABLE (composable function type)
-    - innerTextField: STABLE (composable function type)
-
-@Composable
 public fun io.github.composefluent.component.TextFieldDefaults.DecorationBox(state: androidx.compose.foundation.text.input.TextFieldState, isClearable: kotlin.Boolean, outputTransformation: androidx.compose.foundation.text.input.OutputTransformation?, interactionSource: androidx.compose.foundation.interaction.MutableInteractionSource, enabled: kotlin.Boolean, color: io.github.composefluent.component.TextFieldColor, modifier: androidx.compose.ui.Modifier, shape: androidx.compose.ui.graphics.Shape, header: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>?, placeholder: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>?, leadingIcon: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>?, trailing: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.foundation.layout.RowScope, kotlin.Unit>?, container: androidx.compose.foundation.text.input.TextFieldDecorator, innerTextField: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
   skippable: false
   restartable: true
@@ -3717,12 +3690,6 @@ public fun io.github.composefluent.contentColorFor(backgroundColor: androidx.com
   restartable: false
   params:
     - backgroundColor: STABLE (marked @Stable or @Immutable)
-
-@Composable
-public fun io.github.composefluent.defaultFontFamily(): androidx.compose.ui.text.font.FontFamily?
-  skippable: false
-  restartable: false
-  params:
 
 @Composable
 internal fun io.github.composefluent.layout.FixedWidthLayout(header: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier, verticalArrangement: androidx.compose.foundation.layout.Arrangement.Vertical, intrinsicSize: androidx.compose.foundation.layout.IntrinsicSize, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit

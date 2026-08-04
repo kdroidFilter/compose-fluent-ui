@@ -149,17 +149,6 @@ interface MaterialContainerScope : BoxScope {
      */
     fun Modifier.behindMaterial(): Modifier
 
-    @Deprecated("Use materialOverlay instead")
-    fun Modifier.acrylicOverlay(
-        tint: Color,
-        shape: Shape,
-        enabled: () -> Boolean = { true }
-    ): Modifier {
-        return materialOverlay(
-            material = MaterialDefaults.customAcrylic(tint),
-            enabled = enabled
-        )
-    }
 
     /**
      * Applies a material overlay effect to this [Modifier].

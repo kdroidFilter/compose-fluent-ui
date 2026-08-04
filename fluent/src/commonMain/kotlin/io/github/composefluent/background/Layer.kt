@@ -45,40 +45,6 @@ enum class BackgroundSizing {
     OuterBorderEdge
 }
 
-@Deprecated(
-    message = "Use backgroundSizing",
-    replaceWith = ReplaceWith(
-        expression = "Layer(modifier=modifier,shape=shape,color=color,contentColor=contentColor,border=border,backgroundSizing=if (outsideBorder) BackgroundSizing.InnerBorderEdge else BackgroundSizing.OuterBorderEdge,elevation=elevation,content=content)",
-        imports = arrayOf("io.github.composefluent.background.BackgroundSizing")
-    )
-)
-@Composable
-fun Layer(
-    modifier: Modifier = Modifier,
-    shape: Shape = FluentTheme.shapes.control,
-    color: Color = FluentTheme.colors.background.layer.default,
-    contentColor: Color = FluentTheme.colors.text.text.primary,
-    border: BorderStroke? = BorderStroke(1.dp, FluentTheme.colors.stroke.card.default),
-    outsideBorder: Boolean,
-    elevation: Dp = 0.dp,
-    content: @Composable () -> Unit
-) {
-    Layer(
-        modifier = modifier,
-        shape = shape,
-        color = color,
-        contentColor = contentColor,
-        border = border,
-        elevation = elevation,
-        backgroundSizing = if (outsideBorder) {
-            BackgroundSizing.InnerBorderEdge
-        } else {
-            BackgroundSizing.OuterBorderEdge
-        },
-        content = content
-    )
-}
-
 /**
  * A composable that provides a layered background with customizable shape, color, border, and elevation.
  *

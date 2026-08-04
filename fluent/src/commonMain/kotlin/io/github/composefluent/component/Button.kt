@@ -60,12 +60,6 @@ import io.github.composefluent.scheme.collectVisualState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@Deprecated(
-    message = "use ButtonColorScheme instead.",
-    replaceWith = ReplaceWith("ButtonColorScheme", imports = arrayOf("io.github.composefluent.component.ButtonColorScheme"))
-)
-typealias ButtonColors = ButtonColorScheme
-
 typealias ButtonColorScheme = PentaVisualScheme<ButtonColor>
 
 /**

@@ -393,45 +393,6 @@ object TextFieldDefaults {
         disabled = disabled
     )
 
-    @Deprecated(
-        "Use DecorationBox instead", ReplaceWith(
-            "DecorationBox(" +
-                    "value = value," +
-                    "interactionSource = interactionSource," +
-                    "enabled = enabled," +
-                    "color = color," +
-                    "modifier = modifier," +
-                    "placeholder = placeholder," +
-                    "innerTextField = innerTextField," +
-                    "leadingIcon = null" +
-                    ")"
-        )
-    )
-    @Composable
-    fun DecorationBox(
-        value: String,
-        interactionSource: MutableInteractionSource,
-        enabled: Boolean,
-        color: TextFieldColor,
-        modifier: Modifier = Modifier,
-        placeholder: (@Composable () -> Unit)?,
-        innerTextField: @Composable () -> Unit,
-    ) = DecorationBox(
-        value = value,
-        interactionSource = interactionSource,
-        enabled = enabled,
-        color = color,
-        modifier = modifier,
-        placeholder = placeholder,
-        innerTextField = innerTextField,
-        leadingIcon = null,
-        onClearClick = null,
-        trailing = null,
-        container = {},
-        shape = FluentTheme.shapes.control,
-        header = null
-    )
-
     /**
      * Composable function that provides the visual decoration for a text field.
      *
