@@ -33,6 +33,14 @@ object BuildConfig {
         internal set
 
     /**
+     * Monotonically increasing Android version code derived from [integerVersionName]
+     * as `major * 10000 + minor * 100 + patch`, so 1.0.0 is 10000 and every later
+     * release sorts above it.
+     */
+    var androidVersionCode: Int = 0
+        internal set
+
+    /**
      * Git ref the gallery deep-links its source code to. A release build pins it to the
      * published tag so the links keep working forever; otherwise it is the current branch.
      */

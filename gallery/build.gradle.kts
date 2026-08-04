@@ -108,7 +108,7 @@ android {
     defaultConfig {
         minSdk = BuildConfig.Android.minSdkVersion
         targetSdk = BuildConfig.Android.compileSdkVersion
-        versionCode = 1
+        versionCode = BuildConfig.androidVersionCode
         versionName = BuildConfig.libraryVersion
         vectorDrawables {
             useSupportLibrary = true

@@ -1,6 +1,7 @@
 package io.github.composefluent.plugin.build
 
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import io.github.composefluent.plugin.build.BuildConfig.androidVersionCode
 import io.github.composefluent.plugin.build.BuildConfig.branch
 import io.github.composefluent.plugin.build.BuildConfig.defaultLibraryVersion
 import io.github.composefluent.plugin.build.BuildConfig.integerVersionName
@@ -185,9 +186,12 @@ class BuildPlugin : Plugin<Project> {
         branch = resolvedRelease?.let { "v$it" } ?: currentBranch ?: "master"
 
         // Native installers and app stores only accept a plain X.Y.Z.
-        integerVersionName = libraryVersion.substringBefore("-")
+        val versionParts = libraryVersion.substringBefore("-")
             .split(".")
             .let { parts -> (0..2).map { parts.getOrNull(it)?.toIntOrNull() ?: 0 } }
-            .joinToString(".")
+        integerVersionName = versionParts.joinToString(".")
+
+        val (major, minor, patch) = versionParts
+        androidVersionCode = major * 10_000 + minor * 100 + patch
     }
 }

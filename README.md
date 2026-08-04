@@ -14,11 +14,14 @@
 
 ## Current Status
 
-> This library is experimental, any API would be changed in the future without any notification.
+Stable and in active use. The component set is broad, the public API is settled, and releases
+follow semantic versioning — breaking changes only land in a new major version.
 
-Please note that there are lots of hard-coding and workarounds in our source code, which we plan to eliminate in the future.
+Some APIs are still opt-in behind `@ExperimentalFluentApi` — the material/backdrop layer and parts
+of a few components. Those may change in a minor release; the annotation tells you exactly which
+ones, so nothing changes under you without a compiler warning.
 
-Thank you for using our library. We look forward to receiving your feedback and contributions!
+Feedback and contributions are welcome.
 
 ### Supported Kotlin Targets
 
