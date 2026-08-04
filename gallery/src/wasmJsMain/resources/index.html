@@ -5,11 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compose Fluent Design Gallery</title>
     <link rel="icon" href="composeResources/fluentdesign.gallery.generated.resources/drawable/icon.png">
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
 </head>
-<body>
-<div>
-    <canvas id="ComposeTarget" width="800" height="600"></canvas>
-</div>
+<!-- ComposeViewport appends its own canvas to the body and keeps it sized to the
+     viewport; the fixed 800x600 <canvas id="ComposeTarget"> that CanvasBasedWindow
+     required is gone. -->
+<body></body>
 <script src="gallery.js"></script>
-</body>
 </html>

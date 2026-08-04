@@ -78,8 +78,8 @@ class BuildPlugin : Plugin<Project> {
             }
             scm {
                 url.set(BuildConfig.repositoryUrl)
-                connection.set("scm:git:git://github.com/kdroidFilter/compose-fluent-ui.git")
-                developerConnection.set("scm:git:ssh://github.com/kdroidFilter/compose-fluent-ui.git")
+                connection.set("scm:git:git://github.com/NucleusFramework/compose-fluent-ui.git")
+                developerConnection.set("scm:git:ssh://github.com/NucleusFramework/compose-fluent-ui.git")
             }
         }
 

@@ -8,7 +8,7 @@ object BuildConfig {
 
     const val packageName = "io.github.composefluent"
 
-    const val repositoryUrl = "https://github.com/kdroidFilter/compose-fluent-ui"
+    const val repositoryUrl = "https://github.com/NucleusFramework/compose-fluent-ui"
 
     internal const val snapshotLibraryVersion = "0.1.0-SNAPSHOT"
 

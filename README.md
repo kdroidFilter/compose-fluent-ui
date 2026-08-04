@@ -1,7 +1,7 @@
 <h1><img src="assets/icon.png" alt="Compose Fluent logo" height="48" valign="middle"> Compose Fluent</h1>
 
-[![License](https://img.shields.io/github/license/kdroidFilter/compose-fluent-ui)](LICENSE)
-[![Version](https://img.shields.io/github/v/release/kdroidFilter/compose-fluent-ui?include_prereleases)](https://github.com/kdroidFilter/compose-fluent-ui/releases)
+[![License](https://img.shields.io/github/license/NucleusFramework/compose-fluent-ui)](LICENSE)
+[![Version](https://img.shields.io/github/v/release/NucleusFramework/compose-fluent-ui?include_prereleases)](https://github.com/NucleusFramework/compose-fluent-ui/releases)
 [![Maven Central](https://img.shields.io/maven-central/v/dev.nucleusframework.composefluent/fluent)](https://central.sonatype.com/artifact/dev.nucleusframework.composefluent/fluent/)
 [![Telegram Link](https://img.shields.io/badge/Telegram-compose__fluent__ui-blue?logo=telegram&logoColor=fff)](https://t.me/compose_fluent_ui)
 
@@ -51,8 +51,8 @@ Every release is published to Maven Central from a `vX.Y.Z` tag; check the
 ### Gallery
 
 Prebuilt native gallery installers (Linux `.deb`, macOS `.dmg`, Windows `.exe`) are attached to
-each [GitHub release](https://github.com/kdroidFilter/compose-fluent-ui/releases), and the web
-version is deployed to [GitHub Pages](https://kdroidfilter.github.io/compose-fluent-ui/).
+each [GitHub release](https://github.com/NucleusFramework/compose-fluent-ui/releases), and the web
+version is deployed to [GitHub Pages](https://nucleusframework.github.io/compose-fluent-ui/).
 
 ### Example
 
