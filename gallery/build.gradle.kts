@@ -30,9 +30,9 @@ composeCompiler {
 
 composeStabilityAnalyzer {
     // Gallery: opt-in module-wide recomposition tracing for IDE Heatmap / Doctor.
-    // Gated at runtime by ComposeStabilityAnalyzer.setEnabled(...) in Main.
+    // Off by default (noisy logs); enable with -PcomposeTrace=true.
     traceAll {
-        enabled.set(true)
+        enabled.set(providers.gradleProperty("composeTrace").orNull == "true")
         threshold.set(3)
         // KMP/desktop has no Android variants; runtime enable gate is the safety net.
         variants.set(listOf("debug", "desktop"))
