@@ -329,10 +329,12 @@ private enum class ItemSize {
     Day, MonthYear
 }
 
+// True crossfade: both fades run over the same window. Delaying the fade-in until
+// after the fade-out completes would leave a frame at zero opacity, which reads as
+// the header text blinking rather than swapping.
 private val headerTextTransition = fadeIn(
     tween(
         durationMillis = FluentDuration.QuickDuration,
-        delayMillis = FluentDuration.QuickDuration,
         easing = FluentEasing.FastInvokeEasing
     )
 )
@@ -360,22 +362,21 @@ private fun CalendarHeader(
             disabled = disabled
         ) {
             Box(Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
-                Text(
-                    text = text,
-                    style = FluentTheme.typography.bodyStrong,
-                    textAlign = TextAlign.Start
-                )
-                // FIXME: The animation is only enabled when change choose type
-                /*AnimatedContent(
+                // Keyed on the header text itself, so the crossfade plays for every
+                // change: paginating within a view (May 2024 -> June 2024) as well as
+                // switching the choose type (May 2024 -> 2024 -> 2020-2029).
+                AnimatedContent(
                     modifier = Modifier.fillMaxWidth(),
                     targetState = text,
-                    transitionSpec = { headerTextTransition }) {
+                    transitionSpec = { headerTextTransition },
+                    label = "calendar-header-text"
+                ) {
                     Text(
                         text = it,
                         style = FluentTheme.typography.bodyStrong,
                         textAlign = TextAlign.Start
                     )
-                }*/
+                }
             }
         }
     }
