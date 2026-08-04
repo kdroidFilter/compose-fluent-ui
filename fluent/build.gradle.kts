@@ -1,5 +1,6 @@
 import io.github.composefluent.plugin.build.BuildConfig
 import io.github.composefluent.plugin.build.applyTargets
+import io.github.composefluent.plugin.build.generatedSourceFile
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
@@ -70,4 +71,13 @@ dependencies {
 
 ksp {
     arg("source.generated.module.name", project.name)
+}
+
+// SourceFilePathProcessor.finish() writes this file straight into :source-generated's source
+// tree rather than into this module's build directory. Declaring it as a task output is what
+// lets Gradle notice when it is missing: on a fresh clone, or in CI where the task would
+// otherwise be restored from the build cache without the file ever being recreated, leaving
+// `FluentSourceFile` unresolved in :gallery.
+tasks.matching { it.name == "kspCommonMainKotlinMetadata" }.configureEach {
+    outputs.file(generatedSourceFile("FluentSourceFile"))
 }
