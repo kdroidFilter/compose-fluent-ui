@@ -33,19 +33,33 @@ internal actual fun getLocalMonthNames(): List<String> {
     return jsFun.split(",")
 }
 
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getWeekInfo
-internal actual fun getLocalFirstDayOfWeek(): Int {
-    // zh-CN -> 1 -> Monday -> 2
-    // en-US -> 7 -> Sunday -> 1
-    val language = js("navigator.language") as String
-    val result = js("""
-        var result = null
-        try {
-            var weekInfo = new Intl.Locale(navigator.language).getWeekInfo()
-            var firstDay  = weekInfo.firstDay
-            result = firstDay % 7 + 1
-        } catch(e) { }
-        result
-    """) as Int? ?: fallbackGetLocalFistDayOfWeek(language)
-    return result
-}
+/**
+ * Reads the browser's own CLDR week data.
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getWeekInfo
+ *
+ * Two shapes of this API exist in the wild and both are probed:
+ *  - `getWeekInfo()`, the standard method — Chrome 130+, Firefox 153+, Safari 17+;
+ *  - `weekInfo`, the earlier accessor property — Chrome 99..129 and older WebKit.
+ *
+ * It was changed from accessor to method because it returns a fresh object per access. Calling
+ * only the method throws across that whole earlier band, which previously sent those browsers
+ * down the fallback path even though they had the data.
+ *
+ * `maximize()` adds likely subtags, so a region-less `navigator.language` such as `"fr"` still
+ * resolves against FR instead of the world default — the week data is keyed by region.
+ *
+ * `firstDay` is ISO-numbered 1=Monday..7=Sunday and may be 1, 5, 6 or 7; `% 7 + 1` maps it onto
+ * this module's Sunday(1)..Saturday(7) contract (Mon 1->2, Fri 5->6, Sat 6->7, Sun 7->1).
+ */
+internal actual fun getLocalFirstDayOfWeek(): Int =
+    js(
+        """
+            var result = null
+            try {
+                var locale = new Intl.Locale(navigator.language).maximize()
+                var info = typeof locale.getWeekInfo === 'function' ? locale.getWeekInfo() : locale.weekInfo
+                if (info && info.firstDay) result = info.firstDay % 7 + 1
+            } catch(e) { }
+            result
+        """
+    ) as Int? ?: FALLBACK_FIRST_DAY_OF_WEEK
