@@ -99,7 +99,10 @@ jobs:
         run: |
           set -euo pipefail
           VERSION="${GITHUB_REF_NAME#v}"
-          if [[ "$VERSION" == *-alpha* || "$VERSION" == *-beta* || "$VERSION" == *-dev* ]]; then
+          # Semver: any suffix after a hyphen is a pre-release. Matching on the hyphen rather
+          # than enumerating -alpha/-beta/-dev means a tag like v1.0.0-rc1 is not published as
+          # a final release by accident.
+          if [[ "$VERSION" == *-* ]]; then
             echo "RELEASE_TYPE=prerelease" >> "$GITHUB_ENV"
           else
             echo "RELEASE_TYPE=release" >> "$GITHUB_ENV"

@@ -52,7 +52,9 @@ object BuildConfig {
         internal set
 
     object Android {
-        const val compileSdkVersion = 35
+        // 36 is a floor, not a preference: androidx.navigationevent (pulled in transitively by
+        // activity-compose 1.13.0) refuses to be consumed by a project compiling against less.
+        const val compileSdkVersion = 36
 
         const val minSdkVersion = 24
     }

@@ -27,7 +27,9 @@ fun KotlinMultiplatformExtension.applyTargets(namespaceModule: String = "") {
 
     try {
         androidLibrary {
-            compileSdk = 35
+            // Was a duplicated literal, which let the library modules drift away from the
+            // value :gallery compiles against.
+            compileSdk = BuildConfig.Android.compileSdkVersion
             namespace = "${BuildConfig.packageName}$namespaceModule"
         }
     } catch (_: IllegalStateException) {

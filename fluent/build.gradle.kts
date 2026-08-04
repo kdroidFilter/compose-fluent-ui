@@ -73,6 +73,18 @@ ksp {
     arg("source.generated.module.name", project.name)
 }
 
+// compose-stability-analyzer reads the Android compilation output without declaring it, which
+// Gradle rejects as an undeclared dependency regardless of task order — that alone makes
+// `stabilityCheck` unrunnable on this KMP + Android module.
+//
+// Both tasks are wired, not just the check: whichever compilations happen to be present is what
+// gets scanned, so dumping with only desktop built and checking with android built reports every
+// desktop-only composable (the ContextMenu ones) as removed. Pinning both to the same compilation
+// keeps the baseline and the check comparing like with like.
+tasks.matching { it.name == "stabilityCheck" || it.name == "stabilityDump" }.configureEach {
+    dependsOn("compileAndroidMain", "compileKotlinDesktop")
+}
+
 // SourceFilePathProcessor.finish() writes this file straight into :source-generated's source
 // tree rather than into this module's build directory. Declaring it as a task output is what
 // lets Gradle notice when it is missing: on a fresh clone, or in CI where the task would

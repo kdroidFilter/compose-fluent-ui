@@ -45,3 +45,35 @@ jobs:
           :fluent:compileKotlinIosArm64
           :fluent:compileKotlinIosSimulatorArm64
           --no-daemon --stacktrace
+
+  stability:
+    # Compose stability regressions cost frames silently, so the baselines in
+    # fluent/stability and gallery/stability are enforced rather than advisory.
+    # `allowMissingBaseline` is false when CI=true, so a dropped baseline fails here too.
+    # Runs on Linux: these tasks read the Android compilation output and need the SDK.
+    name: Compose stability
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    env:
+      CI: 'true'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Check composable stability
+        run: >
+          ./gradlew
+          :fluent:stabilityCheck
+          :gallery:stabilityCheck
+          --no-daemon --stacktrace

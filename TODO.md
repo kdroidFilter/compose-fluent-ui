@@ -54,9 +54,11 @@ what is missing or unfinished, not what exists.
 
 ## Release engineering
 
-- [ ] Commit Compose stability baselines (`./gradlew :fluent:stabilityDump`) — the regression
-      gate is configured but inert without them
-- [ ] Broaden CI beyond the Apple compile job if the desktop/web targets ever stop being
+- [x] Compose stability baselines committed and enforced in CI
+- [ ] Smoke-test `publish-maven` and `release-gallery` with a throwaway pre-release tag — neither
+      has ever run, and their first execution should not be the real release
+- [ ] Confirm the `dev.nucleusframework` namespace is verified on Maven Central
+- [ ] Broaden CI beyond the Apple and stability jobs if the desktop/web targets ever stop being
       covered by local builds
 
 ## Done
